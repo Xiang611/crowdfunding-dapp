@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <title>Crowdfunding DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+</head>
+
+<body>
+    <h1>🚀 Crowdfunding DApp</h1>
+
+    ```
+    <!-- Connect Wallet -->
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <p id="account"></p>
+
+    <hr>
+
+    <!-- Create Campaign -->
+    <h2>Create Campaign</h2>
+    <input type="number" id="goal" placeholder="Goal (in ETH)">
+    <input type="number" id="duration" placeholder="Duration (seconds)">
+    <button onclick="createCampaign()">Create</button>
+
+    <hr>
+
+    <!-- Contribute -->
+    <h2>Contribute</h2>
+    <input type="number" id="campaignId" placeholder="Campaign ID">
+    <input type="number" id="amount" placeholder="Amount (ETH)">
+    <button onclick="contribute()">Contribute</button>
+
+    <script>
+        let provider;
+        let signer;
+        let contract;
+
+        const contractAddress = "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
+
+        const abi = [
+            "function createCampaign(uint goal, uint duration)",
+            "function contribute(uint id) payable"
+        ];
+
+        async function connectWallet() {
+            await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
+
+            const address = await signer.getAddress();
+            document.getElementById("account").innerText = "Connected: " + address;
+
+            contract = new ethers.Contract(contractAddress, abi, signer);
+        }
+
+        async function createCampaign() {
+            const goal = document.getElementById("goal").value;
+            const duration = document.getElementById("duration").value;
+
+            const tx = await contract.createCampaign(
+                ethers.utils.parseEther(goal),
+                duration
+            );
+
+            await tx.wait();
+            alert("Campaign Created!");
+        }
+
+        async function contribute() {
+            const id = document.getElementById("campaignId").value;
+            const amount = document.getElementById("amount").value;
+
+            const tx = await contract.contribute(id, {
+                value: ethers.utils.parseEther(amount)
+            });
+
+            await tx.wait();
+            alert("Contribution Successful!");
+        }
+    </script>
+    ```
+
+</body>
+
+</html>
