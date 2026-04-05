@@ -25,23 +25,40 @@ contract Crowdfunding {
     mapping(uint => mapping(address => uint)) public contributions;
     mapping(uint => address[]) public contributors;
 
+    event CampaignCreated(
+        uint campaignId,
+        address creator,
+        uint goal,
+        uint deadline
+    );
+
     function createCampaign(
         string memory _title,
         string memory _description,
         uint _goal,
-        uint _duration
+        uint _durationInDays
     ) public {
+
+        require(_goal > 0, "Goal must be > 0");
+        require(_durationInDays > 0, "Duration must be > 0");
+
+        uint deadline = block.timestamp + (_durationInDays * 1 days);
+
         campaigns.push(
             Campaign(
                 msg.sender,
                 _title,
                 _description,
                 _goal,
-                block.timestamp + _duration,
+                deadline,
                 0,
                 false
             )
         );
+
+        uint campaignId = campaigns.length - 1;
+
+        emit CampaignCreated(campaignId, msg.sender, _goal, deadline);
     }
 
     function contribute(uint id) public payable {
