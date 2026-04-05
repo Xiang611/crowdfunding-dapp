@@ -56,10 +56,14 @@
         }
 
         async function createCampaign() {
+            const title = document.getElementById("title").value;
+            const description = document.getElementById("description").value;
             const goal = document.getElementById("goal").value;
             const duration = document.getElementById("duration").value;
 
             const tx = await contract.createCampaign(
+                title,
+                description,
                 ethers.utils.parseEther(goal),
                 duration
             );
