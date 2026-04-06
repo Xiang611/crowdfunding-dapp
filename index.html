@@ -19,8 +19,10 @@
 
     <!-- Create Campaign -->
     <h2>Create Campaign</h2>
+    <input type="text" id="title" placeholder="Title">
+    <input type="text" id="description" placeholder="Description">
     <input type="number" id="goal" placeholder="Goal (in ETH)">
-    <input type="number" id="duration" placeholder="Duration (seconds)">
+    <input type="number" id="duration" placeholder="Duration (days)">
     <button onclick="createCampaign()">Create</button>
 
     <hr>
@@ -39,7 +41,7 @@
         const contractAddress = "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
 
         const abi = [
-            "function createCampaign(uint goal, uint duration)",
+            "function createCampaign(string title, string description, uint goal, uint durationInDays)",
             "function contribute(uint id) payable"
         ];
 
@@ -56,6 +58,11 @@
         }
 
         async function createCampaign() {
+            if (!contract) {
+                alert("Please connect wallet first");
+                return;
+            }
+
             const title = document.getElementById("title").value;
             const description = document.getElementById("description").value;
             const goal = document.getElementById("goal").value;
