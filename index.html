@@ -1,98 +1,886 @@
 <!DOCTYPE html>
-
 <html>
 
 <head>
-    <title>Crowdfunding DApp</title>
-    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+    <title>CrowdFund DApp</title>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f5f0;
+            color: #1a1a1a;
+            min-height: 100vh;
+        }
+
+        nav {
+            background: #fff;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav-logo {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4f46e5;
+        }
+
+        .wallet-section {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .wallet-address {
+            font-size: 12px;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-family: monospace;
+            display: none;
+        }
+
+        .connect-btn {
+            background: #4f46e5;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s;
+        }
+
+        .connect-btn:hover {
+            background: #4338ca;
+        }
+
+        .logout-btn {
+            background: transparent;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 7px 14px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            display: none;
+            transition: background 0.15s;
+        }
+
+        .logout-btn:hover {
+            background: #fef2f2;
+        }
+
+        .main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 2rem 1rem 4rem;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .page-sub {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .icon-purple {
+            background: #ede9fe;
+            color: #4f46e5;
+        }
+
+        .icon-blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .icon-green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-row.full {
+            grid-template-columns: 1fr;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+
+        .field input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 13px;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s;
+        }
+
+        .field input:focus {
+            border-color: #4f46e5;
+        }
+
+        .field input::placeholder {
+            color: #9ca3af;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-suffix {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            font-weight: 500;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            margin-top: 12px;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-purple {
+            background: #4f46e5;
+            color: #fff;
+        }
+
+        .btn-purple:hover:not(:disabled) {
+            background: #4338ca;
+        }
+
+        .btn-blue {
+            background: #2563eb;
+            color: #fff;
+        }
+
+        .btn-blue:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .btn-green {
+            background: #16a34a;
+            color: #fff;
+        }
+
+        .btn-green:hover:not(:disabled) {
+            background: #15803d;
+        }
+
+        .btn-sm {
+            width: auto;
+            margin-top: 0;
+            padding: 7px 14px;
+            font-size: 12px;
+        }
+
+        .status-bar {
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .status-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            display: block;
+        }
+
+        .status-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            display: block;
+        }
+
+        .status-loading {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e40af;
+            display: block;
+        }
+
+        .divider {
+            height: 1px;
+            background: #f3f4f6;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            vertical-align: middle;
+            margin-right: 5px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ── Campaign cards ── */
+        .campaigns-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .campaign-item {
+            border: 1px solid #e5e5e5;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            transition: border-color 0.15s;
+        }
+
+        .campaign-item:hover {
+            border-color: #c7d2fe;
+        }
+
+        .ci-main {
+            padding: 1rem 1.25rem;
+        }
+
+        .ci-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .ci-id {
+            font-size: 11px;
+            color: #9ca3af;
+            font-family: monospace;
+        }
+
+        .ci-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .ci-desc {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .badge {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+        }
+
+        .badge-active {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-ended {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .ci-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .ci-track {
+            height: 5px;
+            background: #f3f4f6;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .ci-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: #4f46e5;
+        }
+
+        .ci-fill.reached {
+            background: #16a34a;
+        }
+
+        .ci-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 11px;
+            color: #9ca3af;
+            flex-wrap: wrap;
+        }
+
+        .ci-meta span b {
+            color: #374151;
+            font-weight: 500;
+        }
+
+        /* ── Contribute panel inside campaign card ── */
+        .ci-contribute {
+            background: #f9fafb;
+            border-top: 1px solid #f3f4f6;
+            padding: 0.875rem 1.25rem;
+            display: none;
+        }
+
+        .ci-contribute.open {
+            display: block;
+        }
+
+        .ci-contribute-row {
+            display: flex;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .ci-contribute-row .field {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .ci-contribute-row .field label {
+            font-size: 11px;
+        }
+
+        .ci-contribute-row .field input {
+            padding: 8px 40px 8px 10px;
+            font-size: 13px;
+        }
+
+        .contribute-inline-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            white-space: nowrap;
+            transition: background 0.15s, transform 0.1s;
+            margin-bottom: 0;
+        }
+
+        .contribute-inline-btn:hover:not(:disabled) {
+            background: #1d4ed8;
+        }
+
+        .contribute-inline-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .ci-contribute-status {
+            margin-top: 8px;
+            font-size: 11px;
+            padding: 7px 10px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .ci-footer {
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .ci-creator {
+            font-size: 11px;
+            color: #9ca3af;
+            font-family: monospace;
+        }
+
+        .toggle-btn {
+            font-size: 12px;
+            font-weight: 500;
+            color: #2563eb;
+            background: none;
+            border: 1px solid #bfdbfe;
+            border-radius: 6px;
+            padding: 5px 12px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.15s;
+        }
+
+        .toggle-btn:hover {
+            background: #eff6ff;
+        }
+
+        .toggle-btn.active {
+            background: #eff6ff;
+        }
+
+        .toggle-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: #9ca3af;
+            font-size: 13px;
+        }
+
+        .empty-icon {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+
+        .campaign-count {
+            font-size: 12px;
+            color: #9ca3af;
+            font-weight: 400;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>🚀 Crowdfunding DApp</h1>
 
-    ```
-    <!-- Connect Wallet -->
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <p id="account"></p>
+    <nav>
+        <div class="nav-logo">
+            <div class="logo-dot"></div>
+            CrowdFund
+        </div>
+        <div class="wallet-section">
+            <span class="wallet-address" id="walletAddr"></span>
+            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+            <button class="logout-btn" id="logoutBtn" onclick="disconnectWallet()">Disconnect</button>
+        </div>
+    </nav>
 
-    <hr>
+    <div class="main">
+        <p class="page-title">Crowdfunding DApp</p>
+        <p class="page-sub">Create campaigns and contribute ETH directly on-chain.</p>
 
-    <!-- Create Campaign -->
-    <h2>Create Campaign</h2>
-    <input type="text" id="title" placeholder="Title">
-    <input type="text" id="description" placeholder="Description">
-    <input type="number" id="goal" placeholder="Goal (in ETH)">
-    <input type="number" id="duration" placeholder="Duration (days)">
-    <button onclick="createCampaign()">Create</button>
+        <!-- ── All Campaigns ── -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-left">
+                    <div class="card-icon icon-green">&#9776;</div>
+                    All campaigns
+                    <span class="campaign-count" id="campaignCount"></span>
+                </div>
+                <button class="submit-btn btn-green btn-sm" id="loadBtn" onclick="loadAllCampaigns()">Load
+                    campaigns</button>
+            </div>
+            <div id="campaignsArea">
+                <div class="empty-state">
+                    <div class="empty-icon">&#9635;</div>
+                    Connect your wallet and click "Load campaigns"
+                </div>
+            </div>
+            <div class="status-bar" id="loadStatus"></div>
+        </div>
 
-    <hr>
+        <div class="divider"></div>
 
-    <!-- Contribute -->
-    <h2>Contribute</h2>
-    <input type="number" id="campaignId" placeholder="Campaign ID">
-    <input type="number" id="amount" placeholder="Amount (ETH)">
-    <button onclick="contribute()">Contribute</button>
+        <!-- ── Create Campaign ── -->
+        <div class="card">
+            <div class="card-title">
+                <div class="card-title-left">
+                    <div class="card-icon icon-purple">+</div>
+                    Create a campaign
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="field">
+                    <label>Title</label>
+                    <input type="text" id="title" placeholder="e.g. Build a community garden">
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="field">
+                    <label>Description</label>
+                    <input type="text" id="description" placeholder="What is this campaign for?">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="field">
+                    <label>Funding goal</label>
+                    <div class="input-wrap">
+                        <input type="number" id="goal" placeholder="1.0" style="padding-right:40px">
+                        <span class="input-suffix">ETH</span>
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Duration</label>
+                    <div class="input-wrap">
+                        <input type="number" id="duration" placeholder="7" style="padding-right:50px">
+                        <span class="input-suffix">days</span>
+                    </div>
+                </div>
+            </div>
+            <button class="submit-btn btn-purple" id="createBtn" onclick="createCampaign()">Create Campaign</button>
+            <div class="status-bar" id="createStatus"></div>
+        </div>
+
+    </div>
 
     <script>
-        let provider;
-        let signer;
-        let contract;
-
-        const contractAddress = "PASTE_YOUR_CONTRACT_ADDRESS_HERE";
-
+        let provider, signer, contract;
+        const contractAddress = "0x42Bf2bB15Cd9457528DCc43887Cca1aA93aFA843";
         const abi = [
             "function createCampaign(string title, string description, uint goal, uint durationInDays)",
-            "function contribute(uint id) payable"
+            "function contribute(uint id) payable",
+            "function campaigns(uint) view returns (address creator, string title, string description, uint goal, uint deadline, uint amountRaised, bool withdrawn)",
+            "function getCampaignCount() view returns (uint)"
         ];
 
+        // ── Wallet ──────────────────────────────────────────────
         async function connectWallet() {
-            await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-
-            const address = await signer.getAddress();
-            document.getElementById("account").innerText = "Connected: " + address;
-
-            contract = new ethers.Contract(contractAddress, abi, signer);
+            try {
+                await window.ethereum.request({ method: 'eth_requestAccounts' });
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                signer = provider.getSigner();
+                const address = await signer.getAddress();
+                contract = new ethers.Contract(contractAddress, abi, signer);
+                setWalletUI(address);
+            } catch (err) {
+                showStatus("loadStatus", "error", "Connection failed: " + err.message);
+            }
         }
 
-        async function createCampaign() {
-            if (!contract) {
-                alert("Please connect wallet first");
+        function disconnectWallet() {
+            provider = null; signer = null; contract = null;
+            document.getElementById("walletAddr").style.display = "none";
+            document.getElementById("logoutBtn").style.display = "none";
+            document.getElementById("connectBtn").style.display = "block";
+            document.getElementById("connectBtn").textContent = "Connect Wallet";
+            document.getElementById("connectBtn").style.background = "#4f46e5";
+            document.getElementById("campaignsArea").innerHTML = `<div class="empty-state"><div class="empty-icon">&#9635;</div>Connect your wallet and click "Load campaigns"</div>`;
+            document.getElementById("campaignCount").textContent = "";
+        }
+
+        function setWalletUI(address) {
+            const addrEl = document.getElementById("walletAddr");
+            addrEl.style.display = "block";
+            addrEl.textContent = address.slice(0, 6) + "..." + address.slice(-4);
+            const btn = document.getElementById("connectBtn");
+            btn.textContent = "Connected";
+            btn.style.background = "#059669";
+            document.getElementById("logoutBtn").style.display = "block";
+        }
+
+        // ── Load All Campaigns ──────────────────────────────────
+        async function loadAllCampaigns() {
+            if (!contract) { showStatus("loadStatus", "error", "Connect your wallet first."); return; }
+            const btn = document.getElementById("loadBtn");
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Loading...';
+            document.getElementById("loadStatus").style.display = "none";
+            try {
+                const count = (await contract.getCampaignCount()).toNumber();
+                if (count === 0) {
+                    document.getElementById("campaignsArea").innerHTML = `<div class="empty-state"><div class="empty-icon">&#9635;</div>No campaigns created yet. Be the first!</div>`;
+                    document.getElementById("campaignCount").textContent = "";
+                    return;
+                }
+                document.getElementById("campaignCount").textContent = count + " total";
+                const promises = [];
+                for (let i = 0; i < count; i++) promises.push(contract.campaigns(i));
+                const all = await Promise.all(promises);
+                const html = all.map((c, i) => buildCampaignCard(i, c)).join("");
+                document.getElementById("campaignsArea").innerHTML = '<div class="campaigns-grid">' + html + '</div>';
+            } catch (err) {
+                showStatus("loadStatus", "error", "Failed to load: " + (err.reason || err.message));
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = "Refresh";
+            }
+        }
+
+        function buildCampaignCard(id, c) {
+            const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
+            const goal = parseFloat(ethers.utils.formatEther(c.goal));
+            const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
+            const now = Math.floor(Date.now() / 1000);
+            const isActive = now < c.deadline.toNumber();
+            const reached = raised >= goal;
+            const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString();
+
+            let badgeHtml;
+            if (c.withdrawn) badgeHtml = '<span class="badge badge-success">Withdrawn</span>';
+            else if (reached) badgeHtml = '<span class="badge badge-success">Goal reached</span>';
+            else if (isActive) badgeHtml = '<span class="badge badge-active">Active</span>';
+            else badgeHtml = '<span class="badge badge-ended">Ended</span>';
+
+            const fillClass = reached ? "ci-fill reached" : "ci-fill";
+            const canContrib = isActive && !c.withdrawn;
+            const toggleLabel = canContrib ? "Contribute" : "Closed";
+
+            return `
+        <div class="campaign-item" id="card-${id}">
+            <div class="ci-main">
+                <div class="ci-header">
+                    <div>
+                        <div class="ci-id">Campaign #${id}</div>
+                        <div class="ci-title">${escHtml(c.title)}</div>
+                    </div>
+                    ${badgeHtml}
+                </div>
+                <div class="ci-desc">${escHtml(c.description)}</div>
+                <div class="ci-progress-label">
+                    <span>${raised.toFixed(4)} ETH raised</span>
+                    <span>${pct}% of goal</span>
+                </div>
+                <div class="ci-track">
+                    <div class="${fillClass}" style="width:${pct}%"></div>
+                </div>
+                <div class="ci-meta">
+                    <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
+                    <span>Deadline: <b>${deadline}</b></span>
+                    <span>Raised: <b>${raised.toFixed(4)} ETH</b></span>
+                </div>
+            </div>
+
+            <div class="ci-contribute" id="panel-${id}">
+                <div class="ci-contribute-row">
+                    <div class="field">
+                        <label>Amount to contribute</label>
+                        <div class="input-wrap">
+                            <input type="number" id="amt-${id}" placeholder="0.5" style="padding-right:40px">
+                            <span class="input-suffix">ETH</span>
+                        </div>
+                    </div>
+                    <button class="contribute-inline-btn" id="cbtn-${id}" onclick="contributeInline(${id})">
+                        Send ETH
+                    </button>
+                </div>
+                <div class="ci-contribute-status" id="cstatus-${id}"></div>
+            </div>
+
+            <div class="ci-footer">
+                <span class="ci-creator">Creator: ${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</span>
+                <button class="toggle-btn ${canContrib ? '' : ''}"
+                    id="toggle-${id}"
+                    onclick="toggleContribute(${id})"
+                    ${canContrib ? '' : 'disabled'}>
+                    ${toggleLabel}
+                </button>
+            </div>
+        </div>`;
+        }
+
+        function toggleContribute(id) {
+            const panel = document.getElementById("panel-" + id);
+            const btn = document.getElementById("toggle-" + id);
+            const isOpen = panel.classList.contains("open");
+            panel.classList.toggle("open");
+            btn.textContent = isOpen ? "Contribute" : "Cancel";
+            btn.classList.toggle("active", !isOpen);
+        }
+
+        async function contributeInline(id) {
+            const amtInput = document.getElementById("amt-" + id);
+            const amount = amtInput.value.trim();
+            const btn = document.getElementById("cbtn-" + id);
+            const statusEl = document.getElementById("cstatus-" + id);
+
+            if (!amount || parseFloat(amount) <= 0) {
+                showInlineStatus(statusEl, "error", "Enter a valid amount.");
                 return;
             }
 
-            const title = document.getElementById("title").value;
-            const description = document.getElementById("description").value;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Sending...';
+            showInlineStatus(statusEl, "loading", "Waiting for MetaMask confirmation...");
+
+            try {
+                const tx = await contract.contribute(id, { value: ethers.utils.parseEther(amount) });
+                showInlineStatus(statusEl, "loading", "Transaction sent — confirming...");
+                await tx.wait();
+                showInlineStatus(statusEl, "success", "Contributed " + amount + " ETH successfully!");
+                amtInput.value = "";
+                await loadAllCampaigns(); // refresh all cards
+            } catch (err) {
+                showInlineStatus(statusEl, "error", err.reason || err.message);
+                btn.disabled = false;
+                btn.innerHTML = "Send ETH";
+            }
+        }
+
+        function showInlineStatus(el, type, message) {
+            const colors = {
+                success: { bg: "#f0fdf4", border: "#bbf7d0", color: "#166534" },
+                error: { bg: "#fef2f2", border: "#fecaca", color: "#991b1b" },
+                loading: { bg: "#eff6ff", border: "#bfdbfe", color: "#1e40af" }
+            };
+            const s = colors[type];
+            el.style.display = "block";
+            el.style.background = s.bg;
+            el.style.border = "1px solid " + s.border;
+            el.style.color = s.color;
+            el.textContent = message;
+        }
+
+        // ── Create Campaign ─────────────────────────────────────
+        async function createCampaign() {
+            if (!contract) { showStatus("createStatus", "error", "Connect your wallet first."); return; }
+            const title = document.getElementById("title").value.trim();
+            const description = document.getElementById("description").value.trim();
             const goal = document.getElementById("goal").value;
             const duration = document.getElementById("duration").value;
-
-            const tx = await contract.createCampaign(
-                title,
-                description,
-                ethers.utils.parseEther(goal),
-                duration
-            );
-
-            await tx.wait();
-            alert("Campaign Created!");
+            if (!title || !description || !goal || !duration) { showStatus("createStatus", "error", "Please fill in all fields."); return; }
+            const btn = document.getElementById("createBtn");
+            setLoading(btn, true, "Creating...");
+            showStatus("createStatus", "loading", "Waiting for MetaMask confirmation...");
+            try {
+                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), duration);
+                showStatus("createStatus", "loading", "Transaction sent — waiting for confirmation...");
+                const receipt = await tx.wait();
+                showStatus("createStatus", "success", "Campaign created! Tx: " + receipt.transactionHash.slice(0, 20) + "...");
+                ["title", "description", "goal", "duration"].forEach(id => document.getElementById(id).value = "");
+                await loadAllCampaigns();
+            } catch (err) {
+                showStatus("createStatus", "error", err.reason || err.message);
+            } finally {
+                setLoading(btn, false, "Create Campaign");
+            }
         }
 
-        async function contribute() {
-            const id = document.getElementById("campaignId").value;
-            const amount = document.getElementById("amount").value;
+        // ── Helpers ─────────────────────────────────────────────
+        function showStatus(id, type, message) {
+            const el = document.getElementById(id);
+            el.className = "status-bar status-" + type;
+            el.style.display = "block";
+            el.innerText = message;
+        }
 
-            const tx = await contract.contribute(id, {
-                value: ethers.utils.parseEther(amount)
-            });
+        function setLoading(btn, loading, label) {
+            btn.disabled = loading;
+            btn.innerHTML = loading ? '<span class="spinner"></span>' + label : label;
+        }
 
-            await tx.wait();
-            alert("Contribution Successful!");
+        function escHtml(str) {
+            return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
         }
     </script>
-    ```
-
 </body>
 
 </html>
