@@ -38,7 +38,6 @@ contract Crowdfunding {
         uint _goal,
         uint _durationInDays
     ) public {
-
         require(_goal > 0, "Goal must be > 0");
         require(_durationInDays > 0, "Duration must be > 0");
 
@@ -74,36 +73,13 @@ contract Crowdfunding {
         c.amountRaised += msg.value;
     }
 
-    function withdraw(uint id) public {
-        Campaign storage c = campaigns[id];
+    // function withdraw(uint id) public {
 
-        require(msg.sender == c.creator, "Not creator");
-        require(c.amountRaised >= c.goal, "Goal not reached");
-        require(!c.withdrawn, "Already withdrawn");
+    // }
 
-        c.withdrawn = true;
-        payable(c.creator).transfer(c.amountRaised);
+    // function refund(uint id) public {
 
-        for (uint i = 0; i < contributors[id].length; i++) {
-            address user = contributors[id][i];
-            uint amount = contributions[id][user];
-
-            token.mint(user, amount);
-        }
-    }
-
-    function refund(uint id) public {
-        Campaign storage c = campaigns[id];
-
-        require(block.timestamp > c.deadline, "Not ended");
-        require(c.amountRaised < c.goal, "Goal reached");
-
-        uint amount = contributions[id][msg.sender];
-        require(amount > 0, "No contribution");
-
-        contributions[id][msg.sender] = 0;
-        payable(msg.sender).transfer(amount);
-    }
+    // }
 
     function getCampaignCount() public view returns (uint) {
         return campaigns.length;
