@@ -1,323 +1,1191 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>CrowdFund DApp</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChainFund — Decentralised Crowdfunding</title>
     <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
     <style>
-        * {
+        :root {
+            --bg: #f5f6fa;
+            --bg2: #ffffff;
+            --bg3: #f0f1f7;
+            --border: rgba(0, 0, 0, 0.07);
+            --border2: rgba(0, 0, 0, 0.13);
+            --gold: #d4880a;
+            --gold-dim: rgba(212, 136, 10, 0.08);
+            --gold-glow: rgba(212, 136, 10, 0.18);
+            --teal: #00957c;
+            --teal-dim: rgba(0, 149, 124, 0.08);
+            --red: #dc2626;
+            --text: #111318;
+            --text2: #52566b;
+            --text3: #9399b2;
+            --radius: 12px;
+            --radius-sm: 8px;
+            --ff-head: 'Syne', sans-serif;
+            --ff-body: 'Outfit', sans-serif;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        *,
+        *::before,
+        *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f5f0;
-            color: #1a1a1a;
+            font-family: var(--ff-body);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
+        /* ── NAV ─────────────────────────────────────────────────── */
         nav {
-            background: #fff;
-            border-bottom: 1px solid #e5e5e5;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(245, 246, 250, 0.90);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
             padding: 0 2rem;
-            height: 60px;
+            height: 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
         }
 
-        .nav-logo {
-            font-size: 16px;
-            font-weight: 600;
+        .nav-brand {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            font-family: var(--ff-head);
+            font-weight: 700;
+            font-size: 18px;
+            color: var(--text);
+            text-decoration: none;
         }
 
-        .logo-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #4f46e5;
-        }
-
-        .wallet-section {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .wallet-address {
-            font-size: 12px;
-            color: #6b7280;
-            background: #f3f4f6;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-family: monospace;
-            display: none;
-        }
-
-        .connect-btn {
-            background: #4f46e5;
-            color: #fff;
-            border: none;
+        .brand-icon {
+            width: 30px;
+            height: 30px;
             border-radius: 8px;
-            padding: 8px 16px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            transition: background 0.15s;
-        }
-
-        .connect-btn:hover {
-            background: #4338ca;
-        }
-
-        .logout-btn {
-            background: transparent;
-            color: #dc2626;
-            border: 1px solid #fecaca;
-            border-radius: 8px;
-            padding: 7px 14px;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            display: none;
-            transition: background 0.15s;
-        }
-
-        .logout-btn:hover {
-            background: #fef2f2;
-        }
-
-        .main {
-            max-width: 720px;
-            margin: 0 auto;
-            padding: 2rem 1rem 4rem;
-        }
-
-        .page-title {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-
-        .page-sub {
-            font-size: 14px;
-            color: #6b7280;
-            margin-bottom: 2rem;
-        }
-
-        .card {
-            background: #fff;
-            border: 1px solid #e5e5e5;
-            border-radius: 12px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .card-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-title-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
+            background: var(--gold);
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 15px;
+            color: #fff;
+        }
+
+        .nav-tabs {
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 3px;
+        }
+
+        .nav-tab {
+            padding: 6px 18px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text2);
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-family: var(--ff-body);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .nav-tab:hover {
+            color: var(--text);
+        }
+
+        .nav-tab.active {
+            background: var(--bg2);
+            color: var(--gold);
+            border: 1px solid var(--border2);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .wallet-pill {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-family: monospace;
+            color: var(--teal);
+        }
+
+        .wallet-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--teal);
+            box-shadow: 0 0 6px var(--teal);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.4
+            }
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--ff-body);
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: #fff;
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-gold:hover {
+            background: #b8760a;
+            transform: translateY(-1px);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--red);
+            border: 1px solid rgba(255, 90, 90, 0.25);
+            padding: 7px 16px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .btn-ghost:hover {
+            background: rgba(255, 90, 90, 0.08);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text);
+            border: 1px solid var(--border2);
+            padding: 8px 18px;
+            font-size: 13px;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* ── PAGES ───────────────────────────────────────────────── */
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ── HOME ────────────────────────────────────────────────── */
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 6rem 2rem 5rem;
+            text-align: center;
+        }
+
+        .hero-grid-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(212, 136, 10, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(212, 136, 10, 0.05) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+        }
+
+        .hero-glow {
+            position: absolute;
+            top: -80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(212, 136, 10, 0.10) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-glow);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gold);
+            margin-bottom: 1.5rem;
+        }
+
+        .hero h1 {
+            font-family: var(--ff-head);
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 1.25rem;
+            position: relative;
+        }
+
+        .hero h1 span {
+            color: var(--gold);
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--text2);
+            max-width: 520px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.6;
+            font-weight: 300;
+            position: relative;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .btn-hero {
+            padding: 12px 28px;
+            font-size: 15px;
+            border-radius: 10px;
+            font-family: var(--ff-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+
+        .btn-hero-primary {
+            background: var(--gold);
+            color: #fff;
+        }
+
+        .btn-hero-primary:hover {
+            background: #b8760a;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px var(--gold-glow);
+        }
+
+        .btn-hero-sec {
+            background: var(--bg3);
+            color: var(--text);
+            border: 1px solid var(--border2);
+        }
+
+        .btn-hero-sec:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+        }
+
+        /* Stats bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin: 3rem auto 0;
+            max-width: 720px;
+            overflow: hidden;
+        }
+
+        .stat-item {
+            background: var(--bg2);
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-num {
+            font-family: var(--ff-head);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--gold);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        /* Features */
+        .section {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-family: var(--ff-head);
+            font-size: clamp(1.6rem, 3vw, 2.2rem);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            color: var(--text);
+        }
+
+        .section-sub {
+            color: var(--text2);
+            font-size: 0.95rem;
+            max-width: 480px;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-top: 2.5rem;
+        }
+
+        .feature-card {
+            background: var(--bg2);
+            padding: 1.75rem;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            background: var(--bg3);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-bottom: 1rem;
+        }
+
+        .fi-gold {
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-glow);
+        }
+
+        .fi-teal {
+            background: var(--teal-dim);
+            border: 1px solid rgba(0, 201, 167, 0.2);
+        }
+
+        .fi-purple {
+            background: rgba(130, 100, 255, 0.1);
+            border: 1px solid rgba(130, 100, 255, 0.2);
+        }
+
+        .feature-card h3 {
+            font-family: var(--ff-head);
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .feature-card p {
+            font-size: 13px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        /* CTA strip */
+        .cta-strip {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 3rem 2rem;
+            text-align: center;
+            margin: 0 2rem 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-strip::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 150px;
+            background: radial-gradient(ellipse, rgba(212, 136, 10, 0.08), transparent 70%);
+        }
+
+        .cta-strip h2 {
+            font-family: var(--ff-head);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            position: relative;
+        }
+
+        .cta-strip p {
+            color: var(--text2);
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        /* ── CAMPAIGNS ───────────────────────────────────────────── */
+        .campaigns-page {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .page-header h2 {
+            font-family: var(--ff-head);
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .page-header p {
+            color: var(--text2);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .load-bar {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .load-bar-text {
+            font-size: 13px;
+            color: var(--text2);
+        }
+
+        .btn-load {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 9px 20px;
             font-size: 13px;
             font-weight: 600;
+            font-family: var(--ff-body);
+            cursor: pointer;
+            transition: var(--transition);
         }
 
-        .icon-purple {
-            background: #ede9fe;
-            color: #4f46e5;
+        .btn-load:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
         }
 
-        .icon-blue {
-            background: #dbeafe;
-            color: #2563eb;
+        .btn-load:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
 
-        .icon-green {
-            background: #dcfce7;
-            color: #16a34a;
+        /* Campaign card */
+        .campaigns-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
 
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        .cmp-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color var(--transition);
+        }
+
+        .cmp-card:hover {
+            border-color: var(--border2);
+        }
+
+        .cmp-body {
+            padding: 1.25rem 1.5rem;
+        }
+
+        .cmp-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 10px;
         }
 
-        .form-row.full {
-            grid-template-columns: 1fr;
+        .cmp-id {
+            font-size: 11px;
+            color: var(--text3);
+            font-family: monospace;
+            margin-bottom: 3px;
+        }
+
+        .cmp-title {
+            font-family: var(--ff-head);
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .cmp-desc {
+            font-size: 13px;
+            color: var(--text2);
+            margin-bottom: 14px;
+            margin-top: 3px;
+            line-height: 1.5;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .badge-active {
+            background: var(--teal-dim);
+            color: var(--teal);
+            border: 1px solid rgba(0, 201, 167, 0.2);
+        }
+
+        .badge-ended {
+            background: var(--bg3);
+            color: var(--text3);
+            border: 1px solid var(--border);
+        }
+
+        .badge-success {
+            background: var(--gold-dim);
+            color: var(--gold);
+            border: 1px solid var(--gold-glow);
+        }
+
+        .cmp-progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text3);
+            margin-bottom: 6px;
+        }
+
+        .cmp-track {
+            height: 4px;
+            background: var(--bg3);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 14px;
+        }
+
+        .cmp-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, #4f9aff, #7b5ea7);
+            transition: width 0.6s ease;
+        }
+
+        .cmp-fill.reached {
+            background: linear-gradient(90deg, var(--teal), var(--gold));
+        }
+
+        .cmp-meta {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 12px;
+            color: var(--text3);
+            flex-wrap: wrap;
+        }
+
+        .cmp-meta b {
+            color: var(--text2);
+            font-weight: 500;
+        }
+
+        .cmp-footer {
+            padding: 0.875rem 1.5rem;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--bg3);
+        }
+
+        .cmp-creator {
+            font-size: 11px;
+            color: var(--text3);
+            font-family: monospace;
+        }
+
+        .btn-toggle {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--teal);
+            background: var(--teal-dim);
+            border: 1px solid rgba(0, 201, 167, 0.2);
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            transition: var(--transition);
+        }
+
+        .btn-toggle:hover {
+            background: rgba(0, 201, 167, 0.18);
+        }
+
+        .btn-toggle:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .btn-toggle.open {
+            background: rgba(0, 201, 167, 0.18);
+        }
+
+        .cmp-contribute-panel {
+            display: none;
+            padding: 1.125rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--bg3);
+        }
+
+        .cmp-contribute-panel.open {
+            display: block;
+        }
+
+        .contrib-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .contrib-row .field {
+            flex: 1;
         }
 
         .field label {
             display: block;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 500;
-            color: #374151;
+            color: var(--text2);
             margin-bottom: 5px;
-        }
-
-        .field input {
-            width: 100%;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            padding: 9px 12px;
-            font-size: 13px;
-            font-family: 'Inter', sans-serif;
-            color: #1a1a1a;
-            background: #fff;
-            outline: none;
-            transition: border-color 0.15s;
-        }
-
-        .field input:focus {
-            border-color: #4f46e5;
-        }
-
-        .field input::placeholder {
-            color: #9ca3af;
         }
 
         .input-wrap {
             position: relative;
         }
 
-        .input-suffix {
+        .input-wrap input {
+            width: 100%;
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 9px 38px 9px 12px;
+            font-size: 13px;
+            color: var(--text);
+            font-family: var(--ff-body);
+            outline: none;
+            transition: border-color var(--transition);
+        }
+
+        .input-wrap input:focus {
+            border-color: var(--teal);
+        }
+
+        .input-wrap input::placeholder {
+            color: var(--text3);
+        }
+
+        .input-sfx {
             position: absolute;
             right: 10px;
             top: 50%;
             transform: translateY(-50%);
             font-size: 11px;
-            font-weight: 500;
-            color: #9ca3af;
+            color: var(--text3);
             pointer-events: none;
-        }
-
-        .submit-btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
             font-weight: 500;
+        }
+
+        .btn-send {
+            background: var(--teal);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 9px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--ff-body);
             cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            margin-top: 12px;
-            transition: opacity 0.15s, transform 0.1s;
+            white-space: nowrap;
+            transition: var(--transition);
         }
 
-        .submit-btn:active {
-            transform: scale(0.98);
+        .btn-send:hover {
+            filter: brightness(1.1);
         }
 
-        .submit-btn:disabled {
+        .btn-send:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-purple {
-            background: #4f46e5;
-            color: #fff;
-        }
-
-        .btn-purple:hover:not(:disabled) {
-            background: #4338ca;
-        }
-
-        .btn-blue {
-            background: #2563eb;
-            color: #fff;
-        }
-
-        .btn-blue:hover:not(:disabled) {
-            background: #1d4ed8;
-        }
-
-        .btn-green {
-            background: #16a34a;
-            color: #fff;
-        }
-
-        .btn-green:hover:not(:disabled) {
-            background: #15803d;
-        }
-
-        .btn-sm {
-            width: auto;
-            margin-top: 0;
-            padding: 7px 14px;
-            font-size: 12px;
-        }
-
-        .status-bar {
-            border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 12px;
-            margin-top: 10px;
+        .inline-status {
             display: none;
+            margin-top: 10px;
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            font-size: 12px;
         }
 
-        .status-success {
-            background: #f0fdf4;
-            border: 1px solid #bbf7d0;
-            color: #166534;
+        /* ── CREATE ──────────────────────────────────────────────── */
+        .create-page {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem 4rem;
+        }
+
+        .form-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+        }
+
+        .form-section-title {
+            font-family: var(--ff-head);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-section-title:first-of-type {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid.full {
+            grid-template-columns: 1fr;
+        }
+
+        .form-field {
+            margin-bottom: 14px;
+        }
+
+        .form-field label {
             display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text2);
+            margin-bottom: 6px;
         }
 
-        .status-error {
-            background: #fef2f2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            display: block;
+        .form-field input {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            padding: 10px 40px 10px 14px;
+            font-size: 13px;
+            color: var(--text);
+            font-family: var(--ff-body);
+            outline: none;
+            transition: border-color var(--transition);
         }
 
-        .status-loading {
-            background: #eff6ff;
-            border: 1px solid #bfdbfe;
-            color: #1e40af;
-            display: block;
+        .form-field input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(240, 165, 0, 0.08);
         }
 
-        .divider {
-            height: 1px;
-            background: #f3f4f6;
-            margin: 0.5rem 0 1rem;
+        .form-field input::placeholder {
+            color: var(--text3);
         }
 
+        .btn-create {
+            width: 100%;
+            padding: 13px;
+            background: var(--gold);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--ff-head);
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 1.5rem;
+            letter-spacing: 0.01em;
+        }
+
+        .btn-create:hover {
+            background: #b8760a;
+            box-shadow: 0 6px 20px var(--gold-glow);
+            transform: translateY(-1px);
+        }
+
+        .btn-create:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .status-msg {
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            font-size: 12px;
+            margin-top: 14px;
+            display: none;
+            line-height: 1.5;
+        }
+
+        /* ── ABOUT ───────────────────────────────────────────────── */
+        .about-hero {
+            position: relative;
+            overflow: hidden;
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+        }
+
+        .about-hero-bg {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0, 149, 124, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 149, 124, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 100%);
+        }
+
+        .about-hero-glow {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 500px;
+            height: 300px;
+            background: radial-gradient(ellipse, rgba(0, 149, 124, 0.08) 0%, transparent 70%);
+        }
+
+        .about-hero h1 {
+            font-family: var(--ff-head);
+            font-size: clamp(2rem, 4vw, 3rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .about-hero h1 span {
+            color: var(--teal);
+        }
+
+        .about-hero p {
+            color: var(--text2);
+            font-size: 1rem;
+            max-width: 540px;
+            margin: 0 auto;
+            line-height: 1.7;
+            position: relative;
+        }
+
+        .about-section {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .mission-block {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--teal);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .mission-block p {
+            font-size: 1.05rem;
+            color: var(--text2);
+            line-height: 1.8;
+            font-weight: 300;
+        }
+
+        .mission-block p strong {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1px;
+            background: var(--border);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 3rem;
+        }
+
+        .value-card {
+            background: var(--bg2);
+            padding: 1.5rem;
+            transition: background var(--transition);
+        }
+
+        .value-card:hover {
+            background: var(--bg3);
+        }
+
+        .value-icon {
+            font-size: 22px;
+            margin-bottom: 10px;
+        }
+
+        .value-card h3 {
+            font-family: var(--ff-head);
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text);
+        }
+
+        .value-card p {
+            font-size: 12px;
+            color: var(--text2);
+            line-height: 1.6;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+        }
+
+        .team-card {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            text-align: center;
+            transition: border-color var(--transition);
+        }
+
+        .team-card:hover {
+            border-color: var(--gold);
+        }
+
+        .team-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            margin: 0 auto 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--ff-head);
+            font-size: 20px;
+            font-weight: 700;
+            border: 2px solid var(--border2);
+        }
+
+        .av-gold {
+            background: var(--gold-dim);
+            color: var(--gold);
+            border-color: var(--gold-glow);
+        }
+
+        .av-teal {
+            background: var(--teal-dim);
+            color: var(--teal);
+            border-color: rgba(0, 201, 167, 0.25);
+        }
+
+        .av-purple {
+            background: rgba(130, 100, 255, 0.1);
+            color: #8264ff;
+            border-color: rgba(130, 100, 255, 0.25);
+        }
+
+        .av-blue {
+            background: rgba(79, 154, 255, 0.1);
+            color: #4f9aff;
+            border-color: rgba(79, 154, 255, 0.25);
+        }
+
+        .team-card h3 {
+            font-family: var(--ff-head);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 3px;
+        }
+
+        .team-card .role {
+            font-size: 12px;
+            color: var(--gold);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .team-card p {
+            font-size: 12px;
+            color: var(--text2);
+            line-height: 1.5;
+        }
+
+        .tech-row {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.75rem 2rem;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .tech-row h3 {
+            font-family: var(--ff-head);
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text2);
+            white-space: nowrap;
+        }
+
+        .tech-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tech-pill {
+            font-size: 12px;
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-weight: 500;
+            background: var(--bg3);
+            border: 1px solid var(--border2);
+            color: var(--text2);
+        }
+
+        /* ── SHARED UTILS ─────────────────────────────────────────── */
         .spinner {
             display: inline-block;
             width: 12px;
             height: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.35);
             border-top-color: #fff;
             border-radius: 50%;
             animation: spin 0.6s linear infinite;
             vertical-align: middle;
             margin-right: 5px;
+        }
+
+        .spinner-white {
+            border-color: rgba(255, 255, 255, 0.3);
+            border-top-color: var(--text);
         }
 
         @keyframes spin {
@@ -326,321 +1194,392 @@
             }
         }
 
-        /* ── Campaign cards ── */
-        .campaigns-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .campaign-item {
-            border: 1px solid #e5e5e5;
-            border-radius: 10px;
-            overflow: hidden;
-            background: #fff;
-            transition: border-color 0.15s;
-        }
-
-        .campaign-item:hover {
-            border-color: #c7d2fe;
-        }
-
-        .ci-main {
-            padding: 1rem 1.25rem;
-        }
-
-        .ci-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 6px;
-        }
-
-        .ci-id {
-            font-size: 11px;
-            color: #9ca3af;
-            font-family: monospace;
-        }
-
-        .ci-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 2px;
-        }
-
-        .ci-desc {
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 10px;
-        }
-
-        .badge {
-            display: inline-block;
-            font-size: 11px;
-            font-weight: 500;
-            padding: 3px 10px;
-            border-radius: 20px;
-        }
-
-        .badge-active {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .badge-ended {
-            background: #f3f4f6;
-            color: #6b7280;
-        }
-
-        .badge-success {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .ci-progress-label {
-            display: flex;
-            justify-content: space-between;
-            font-size: 11px;
-            color: #6b7280;
-            margin-bottom: 5px;
-        }
-
-        .ci-track {
-            height: 5px;
-            background: #f3f4f6;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 10px;
-        }
-
-        .ci-fill {
-            height: 100%;
-            border-radius: 4px;
-            background: #4f46e5;
-        }
-
-        .ci-fill.reached {
-            background: #16a34a;
-        }
-
-        .ci-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 11px;
-            color: #9ca3af;
-            flex-wrap: wrap;
-        }
-
-        .ci-meta span b {
-            color: #374151;
-            font-weight: 500;
-        }
-
-        /* ── Contribute panel inside campaign card ── */
-        .ci-contribute {
-            background: #f9fafb;
-            border-top: 1px solid #f3f4f6;
-            padding: 0.875rem 1.25rem;
-            display: none;
-        }
-
-        .ci-contribute.open {
-            display: block;
-        }
-
-        .ci-contribute-row {
-            display: flex;
-            gap: 8px;
-            align-items: flex-end;
-        }
-
-        .ci-contribute-row .field {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .ci-contribute-row .field label {
-            font-size: 11px;
-        }
-
-        .ci-contribute-row .field input {
-            padding: 8px 40px 8px 10px;
-            font-size: 13px;
-        }
-
-        .contribute-inline-btn {
-            padding: 8px 16px;
-            border: none;
-            border-radius: 8px;
-            background: #2563eb;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            white-space: nowrap;
-            transition: background 0.15s, transform 0.1s;
-            margin-bottom: 0;
-        }
-
-        .contribute-inline-btn:hover:not(:disabled) {
-            background: #1d4ed8;
-        }
-
-        .contribute-inline-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .ci-contribute-status {
-            margin-top: 8px;
-            font-size: 11px;
-            padding: 7px 10px;
-            border-radius: 6px;
-            display: none;
-        }
-
-        .ci-footer {
-            padding: 0.75rem 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-top: 1px solid #f3f4f6;
-        }
-
-        .ci-creator {
-            font-size: 11px;
-            color: #9ca3af;
-            font-family: monospace;
-        }
-
-        .toggle-btn {
-            font-size: 12px;
-            font-weight: 500;
-            color: #2563eb;
-            background: none;
-            border: 1px solid #bfdbfe;
-            border-radius: 6px;
-            padding: 5px 12px;
-            cursor: pointer;
-            font-family: 'Inter', sans-serif;
-            transition: background 0.15s;
-        }
-
-        .toggle-btn:hover {
-            background: #eff6ff;
-        }
-
-        .toggle-btn.active {
-            background: #eff6ff;
-        }
-
-        .toggle-btn:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-        }
-
         .empty-state {
             text-align: center;
-            padding: 2.5rem 1rem;
-            color: #9ca3af;
+            padding: 3rem 1rem;
+            color: var(--text3);
             font-size: 13px;
         }
 
         .empty-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: 32px;
+            margin-bottom: 10px;
+            opacity: 0.3;
         }
 
-        .campaign-count {
-            font-size: 12px;
-            color: #9ca3af;
-            font-weight: 400;
+        .divider-line {
+            height: 1px;
+            background: var(--border);
+            margin: 0;
+        }
+
+        @media (max-width: 640px) {
+            .nav-tabs {
+                display: none;
+            }
+
+            .mobile-tabs {
+                display: flex;
+                overflow-x: auto;
+                gap: 2px;
+                padding: 10px 1rem;
+                background: var(--bg2);
+                border-bottom: 1px solid var(--border);
+            }
+
+            .mobile-tab {
+                flex-shrink: 0;
+                padding: 7px 16px;
+                border-radius: 7px;
+                font-size: 13px;
+                font-weight: 500;
+                color: var(--text2);
+                cursor: pointer;
+                border: 1px solid transparent;
+                background: transparent;
+                font-family: var(--ff-body);
+            }
+
+            .mobile-tab.active {
+                background: var(--bg3);
+                color: var(--gold);
+                border-color: var(--border2);
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-bar {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (min-width: 641px) {
+            .mobile-tabs {
+                display: none;
+            }
         }
     </style>
 </head>
 
 <body>
 
+    <!-- NAV -->
     <nav>
-        <div class="nav-logo">
-            <div class="logo-dot"></div>
-            CrowdFund
+        <a class="nav-brand" href="#" onclick="showTab('home'); return false;">
+            <div class="brand-icon">⟡</div>
+            ChainFund
+        </a>
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="showTab('home')">Home</button>
+            <button class="nav-tab" onclick="showTab('campaigns')">Campaigns</button>
+            <button class="nav-tab" onclick="showTab('create')">Create</button>
+            <button class="nav-tab" onclick="showTab('about')">About Us</button>
         </div>
-        <div class="wallet-section">
-            <span class="wallet-address" id="walletAddr"></span>
-            <button class="connect-btn" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
-            <button class="logout-btn" id="logoutBtn" onclick="disconnectWallet()">Disconnect</button>
+        <div class="nav-right">
+            <span class="wallet-pill" id="walletPill">
+                <span class="wallet-dot"></span>
+                <span id="walletAddr">0x000...0000</span>
+            </span>
+            <button class="btn btn-gold" id="connectBtn" onclick="connectWallet()">Connect Wallet</button>
+            <button class="btn btn-ghost" id="logoutBtn" onclick="disconnectWallet()">Disconnect</button>
         </div>
     </nav>
 
-    <div class="main">
-        <p class="page-title">Crowdfunding DApp</p>
-        <p class="page-sub">Create campaigns and contribute ETH directly on-chain.</p>
+    <!-- MOBILE TABS -->
+    <div class="mobile-tabs">
+        <button class="mobile-tab active" onclick="showTab('home')">Home</button>
+        <button class="mobile-tab" onclick="showTab('campaigns')">Campaigns</button>
+        <button class="mobile-tab" onclick="showTab('create')">Create</button>
+        <button class="mobile-tab" onclick="showTab('about')">About Us</button>
+    </div>
 
-        <!-- ── All Campaigns ── -->
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-left">
-                    <div class="card-icon icon-green">&#9776;</div>
-                    All campaigns
-                    <span class="campaign-count" id="campaignCount"></span>
-                </div>
-                <button class="submit-btn btn-green btn-sm" id="loadBtn" onclick="loadAllCampaigns()">Load
-                    campaigns</button>
-            </div>
-            <div id="campaignsArea">
-                <div class="empty-state">
-                    <div class="empty-icon">&#9635;</div>
-                    Connect your wallet and click "Load campaigns"
-                </div>
-            </div>
-            <div class="status-bar" id="loadStatus"></div>
-        </div>
+    <!-- ═══ HOME PAGE ═══════════════════════════════════════════ -->
+    <div class="page active" id="page-home">
 
-        <div class="divider"></div>
+        <section class="hero">
+            <div class="hero-grid-bg"></div>
+            <div class="hero-glow"></div>
+            <div class="hero-badge">⬡ Built on Ethereum · Fully On-Chain</div>
+            <h1>Fund ideas that<br>matter — <span>on-chain</span></h1>
+            <p>ChainFund is a decentralised crowdfunding platform where every transaction is transparent,
+                permissionless, and secured by the Ethereum blockchain.</p>
+            <div class="hero-actions">
+                <button class="btn-hero btn-hero-primary" onclick="showTab('campaigns')">Browse Campaigns →</button>
+                <button class="btn-hero btn-hero-sec" onclick="showTab('create')">Start a Campaign</button>
+            </div>
+            <div class="stats-bar">
+                <div class="stat-item">
+                    <div class="stat-num" id="statCampaigns">—</div>
+                    <div class="stat-label">Total Campaigns</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">100%</div>
+                    <div class="stat-label">On-Chain Verified</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-num">0%</div>
+                    <div class="stat-label">Platform Fees</div>
+                </div>
+            </div>
+        </section>
 
-        <!-- ── Create Campaign ── -->
-        <div class="card">
-            <div class="card-title">
-                <div class="card-title-left">
-                    <div class="card-icon icon-purple">+</div>
-                    Create a campaign
+        <section class="section">
+            <div class="section-label">Why ChainFund</div>
+            <div class="section-title">Crowdfunding reimagined<br>for Web3</div>
+            <div class="section-sub">No middlemen. No hidden fees. Your contributions go directly on-chain and funds are
+                released transparently when goals are met.</div>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon fi-gold">🔒</div>
+                    <h3>Non-Custodial</h3>
+                    <p>Your funds are held in a smart contract — not by us. Nobody can move money without on-chain rules
+                        being satisfied.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-teal">🌐</div>
+                    <h3>Fully Transparent</h3>
+                    <p>Every contribution and withdrawal is a public transaction on Ethereum. Anyone can audit the
+                        funding trail at any time.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-purple">⚡</div>
+                    <h3>Instant Settlement</h3>
+                    <p>No bank delays. Funds are available to campaign creators the moment their goal is reached and
+                        deadline passes.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-gold">🌍</div>
+                    <h3>Permissionless</h3>
+                    <p>Anyone with an Ethereum wallet can create a campaign or contribute — no sign-ups, no KYC, no
+                        geographic restrictions.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-teal">📋</div>
+                    <h3>Smart Contract Governed</h3>
+                    <p>Campaign rules, deadlines, and goals are locked in code. No admin can change them after a
+                        campaign is launched.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon fi-purple">🔗</div>
+                    <h3>Composable</h3>
+                    <p>Our open contract is readable on Etherscan. Developers can build integrations and extensions
+                        freely on top.</p>
                 </div>
             </div>
-            <div class="form-row full">
-                <div class="field">
-                    <label>Title</label>
-                    <input type="text" id="title" placeholder="e.g. Build a community garden">
-                </div>
-            </div>
-            <div class="form-row full">
-                <div class="field">
-                    <label>Description</label>
-                    <input type="text" id="description" placeholder="What is this campaign for?">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="field">
-                    <label>Funding goal</label>
-                    <div class="input-wrap">
-                        <input type="number" id="goal" placeholder="1.0" style="padding-right:40px">
-                        <span class="input-suffix">ETH</span>
-                    </div>
-                </div>
-                <div class="field">
-                    <label>Duration</label>
-                    <div class="input-wrap">
-                        <input type="number" id="duration" placeholder="7" style="padding-right:50px">
-                        <span class="input-suffix">days</span>
-                    </div>
-                </div>
-            </div>
-            <button class="submit-btn btn-purple" id="createBtn" onclick="createCampaign()">Create Campaign</button>
-            <div class="status-bar" id="createStatus"></div>
+        </section>
+
+        <div class="cta-strip">
+            <h2>Ready to fund your next idea?</h2>
+            <p>Connect your wallet and launch a campaign in under 60 seconds.</p>
+            <button class="btn-hero btn-hero-primary" onclick="showTab('create')">Launch a Campaign →</button>
         </div>
 
     </div>
+
+    <!-- ═══ CAMPAIGNS PAGE ══════════════════════════════════════ -->
+    <div class="page" id="page-campaigns">
+        <div class="campaigns-page">
+            <div class="page-header">
+                <div>
+                    <h2>Live Campaigns</h2>
+                    <p>Browse all campaigns and contribute ETH directly on-chain</p>
+                </div>
+            </div>
+
+            <div class="load-bar">
+                <span class="load-bar-text" id="campaignCountLabel">Connect your wallet and load campaigns to get
+                    started.</span>
+                <button class="btn-load" id="loadBtn" onclick="loadAllCampaigns()">
+                    Load Campaigns
+                </button>
+            </div>
+
+            <div id="campaignsArea">
+                <div class="empty-state">
+                    <div class="empty-icon">◫</div>
+                    No campaigns loaded yet
+                </div>
+            </div>
+
+            <div class="status-msg" id="loadStatus"></div>
+        </div>
+    </div>
+
+    <!-- ═══ CREATE PAGE ═════════════════════════════════════════ -->
+    <div class="page" id="page-create">
+        <div class="create-page">
+            <div class="page-header">
+                <div>
+                    <h2>Create a Campaign</h2>
+                    <p>Fill in the details below to deploy your campaign on-chain</p>
+                </div>
+            </div>
+
+            <div class="form-card">
+                <div class="form-section-title">Campaign Details</div>
+                <div class="form-field">
+                    <label>Campaign Title</label>
+                    <div class="input-wrap">
+                        <input type="text" id="title" placeholder="e.g. Build a community solar grid">
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label>Description</label>
+                    <div class="input-wrap">
+                        <input type="text" id="description" placeholder="What will this campaign fund?">
+                    </div>
+                </div>
+
+                <div class="form-section-title">Funding Parameters</div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label>Funding Goal</label>
+                        <div class="input-wrap">
+                            <input type="number" id="goal" placeholder="1.0">
+                            <span class="input-sfx">ETH</span>
+                        </div>
+                    </div>
+                    <div class="form-field">
+                        <label>Duration</label>
+                        <div class="input-wrap">
+                            <input type="number" id="duration" placeholder="7">
+                            <span class="input-sfx">days</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;font-size:12px;color:var(--text2);line-height:1.6;margin-top:0.5rem;">
+                    ℹ️ &nbsp;Once deployed, your campaign title, goal, and deadline are immutable — they are governed by
+                    the smart contract and cannot be changed. Make sure all details are correct before proceeding.
+                </div>
+
+                <button class="btn-create" id="createBtn" onclick="createCampaign()">Deploy Campaign →</button>
+                <div class="status-msg" id="createStatus"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ ABOUT PAGE ══════════════════════════════════════════ -->
+    <div class="page" id="page-about">
+
+        <div class="about-hero">
+            <div class="about-hero-bg"></div>
+            <div class="about-hero-glow"></div>
+            <div class="hero-badge"
+                style="border-color:rgba(0,201,167,0.25);background:rgba(0,201,167,0.08);color:var(--teal);">🌿 Open
+                Source · Community Driven</div>
+            <h1 style="margin-top:1rem;">Building the future of<br><span>decentralised giving</span></h1>
+            <p>ChainFund was born out of a belief that fundraising should be open, borderless, and free from gatekeeping
+                — powered by code, not intermediaries.</p>
+        </div>
+
+        <div class="about-section">
+
+            <div style="margin-bottom:0.5rem" class="section-label">Our Mission</div>
+            <div class="mission-block">
+                <p>
+                    We believe <strong>financial infrastructure should be public</strong>. Traditional crowdfunding
+                    platforms take 5–8% fees, require identity verification, and restrict access by geography or banking
+                    status. ChainFund eliminates all of that.<br><br>
+                    By placing campaign logic entirely on the Ethereum blockchain, we ensure that <strong>creators
+                        receive exactly what backers pledge</strong>, deadline rules are enforced automatically, and
+                    every transaction is permanently auditable by anyone, anywhere, forever.
+                </p>
+            </div>
+
+            <div class="section-label" style="margin-bottom:1rem">Our Values</div>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🔓</div>
+                    <h3>Openness</h3>
+                    <p>Our smart contract is fully open-source and verified on Etherscan. No black boxes.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">⚖️</div>
+                    <h3>Fairness</h3>
+                    <p>Zero platform fees. Every wei of ETH contributed goes directly toward the campaign goal.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🌍</div>
+                    <h3>Inclusivity</h3>
+                    <p>If you have an Ethereum wallet, you can participate — regardless of where you live.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🛡️</div>
+                    <h3>Trust</h3>
+                    <p>Smart contract rules are immutable post-deploy. No admin keys, no rug pulls.</p>
+                </div>
+            </div>
+
+            <div class="section-label" style="margin-bottom:1.25rem">The Team</div>
+            <div class="team-grid">
+                <div class="team-card">
+                    <div class="team-avatar av-gold">HY</div>
+                    <h3>Loh Hong Yi</h3>
+                    <div class="role">Founder & Smart Contract Dev</div>
+                    <p>Solidity engineer with 4+ years building DeFi primitives on Ethereum and Layer 2 networks.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar av-teal">KT</div>
+                    <h3>Tan Ke Tian</h3>
+                    <div class="role">Lead Frontend Engineer</div>
+                    <p>Specialises in dApp UX — bridging the gap between web3 complexity and intuitive user interfaces.
+                    </p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar av-purple">Leon</div>
+                    <h3>Leon Chan Kai Xiang</h3>
+                    <div class="role">Blockchain Architect</div>
+                    <p>Protocol design and security audits. Previously a core contributor to two Ethereum DAOs.</p>
+                </div>
+                <div class="team-card">
+                    <div class="team-avatar av-blue">KX</div>
+                    <h3>Tan Kai Xin</h3>
+                    <div class="role">Community & Growth</div>
+                    <p>Web3 community builder with a background in open-source governance and DAOs.</p>
+                </div>
+            </div>
+
+            <div class="tech-row">
+                <h3>Built with</h3>
+                <div class="tech-pills">
+                    <span class="tech-pill">Solidity 0.8</span>
+                    <span class="tech-pill">Ethereum</span>
+                    <span class="tech-pill">ethers.js v5</span>
+                    <span class="tech-pill">MetaMask</span>
+                    <span class="tech-pill">Hardhat</span>
+                    <span class="tech-pill">Etherscan Verified</span>
+                    <span class="tech-pill">IPFS</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ═══ FOOTER ══════════════════════════════════════════════ -->
+    <div class="divider-line"></div>
+    <footer
+        style="max-width:900px;margin:0 auto;padding:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+        <div
+            style="display:flex;align-items:center;gap:8px;font-family:var(--ff-head);font-weight:700;font-size:15px;color:var(--text);">
+            <div class="brand-icon"
+                style="width:22px;height:22px;font-size:11px;border-radius:6px;background:var(--gold);color:#fff;">⟡
+            </div>
+            ChainFund
+        </div>
+        <div style="font-size:12px;color:var(--text3);">© 2025 ChainFund. Open source. No rights reserved.</div>
+        <div style="display:flex;gap:1.5rem;font-size:12px;color:var(--text3);">
+            <a href="#" style="color:var(--text3);text-decoration:none;" onmouseover="this.style.color='var(--gold)'"
+                onmouseout="this.style.color='var(--text3)'">Etherscan</a>
+            <a href="#" style="color:var(--text3);text-decoration:none;" onmouseover="this.style.color='var(--gold)'"
+                onmouseout="this.style.color='var(--text3)'">GitHub</a>
+            <a href="#" style="color:var(--text3);text-decoration:none;" onmouseover="this.style.color='var(--gold)'"
+                onmouseout="this.style.color='var(--text3)'">Docs</a>
+        </div>
+    </footer>
 
     <script>
         let provider, signer, contract;
@@ -652,7 +1591,21 @@
             "function getCampaignCount() view returns (uint)"
         ];
 
-        // ── Wallet ──────────────────────────────────────────────
+        /* ── Tab navigation ── */
+        function showTab(name) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + name).classList.add('active');
+            document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => {
+                if (t.textContent.trim().toLowerCase().startsWith(name === 'home' ? 'home' :
+                    name === 'campaigns' ? 'camp' : name === 'create' ? 'create' : 'about')) {
+                    t.classList.add('active');
+                }
+            });
+            window.scrollTo(0, 0);
+        }
+
+        /* ── Wallet ── */
         async function connectWallet() {
             try {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
@@ -661,224 +1614,215 @@
                 const address = await signer.getAddress();
                 contract = new ethers.Contract(contractAddress, abi, signer);
                 setWalletUI(address);
+                loadCampaignCount();
             } catch (err) {
-                showStatus("loadStatus", "error", "Connection failed: " + err.message);
+                showStatusMsg('loadStatus', 'error', 'Connection failed: ' + err.message);
             }
         }
 
         function disconnectWallet() {
             provider = null; signer = null; contract = null;
-            document.getElementById("walletAddr").style.display = "none";
-            document.getElementById("logoutBtn").style.display = "none";
-            document.getElementById("connectBtn").style.display = "block";
-            document.getElementById("connectBtn").textContent = "Connect Wallet";
-            document.getElementById("connectBtn").style.background = "#4f46e5";
-            document.getElementById("campaignsArea").innerHTML = `<div class="empty-state"><div class="empty-icon">&#9635;</div>Connect your wallet and click "Load campaigns"</div>`;
-            document.getElementById("campaignCount").textContent = "";
+            document.getElementById('walletPill').style.display = 'none';
+            document.getElementById('logoutBtn').style.display = 'none';
+            const cb = document.getElementById('connectBtn');
+            cb.style.display = 'inline-flex';
+            cb.textContent = 'Connect Wallet';
+            cb.style.background = 'var(--gold)';
+            document.getElementById('campaignsArea').innerHTML = '<div class="empty-state"><div class="empty-icon">◫</div>Connect your wallet to view campaigns</div>';
+            document.getElementById('campaignCountLabel').textContent = 'Connect your wallet and load campaigns to get started.';
+            document.getElementById('statCampaigns').textContent = '—';
         }
 
         function setWalletUI(address) {
-            const addrEl = document.getElementById("walletAddr");
-            addrEl.style.display = "block";
-            addrEl.textContent = address.slice(0, 6) + "..." + address.slice(-4);
-            const btn = document.getElementById("connectBtn");
-            btn.textContent = "Connected";
-            btn.style.background = "#059669";
-            document.getElementById("logoutBtn").style.display = "block";
+            document.getElementById('walletAddr').textContent = address.slice(0, 6) + '...' + address.slice(-4);
+            document.getElementById('walletPill').style.display = 'inline-flex';
+            const cb = document.getElementById('connectBtn');
+            cb.textContent = '✓ Connected';
+            cb.style.background = '#15803d';
+            document.getElementById('logoutBtn').style.display = 'inline-flex';
         }
 
-        // ── Load All Campaigns ──────────────────────────────────
-        async function loadAllCampaigns() {
-            if (!contract) { showStatus("loadStatus", "error", "Connect your wallet first."); return; }
-            const btn = document.getElementById("loadBtn");
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span>Loading...';
-            document.getElementById("loadStatus").style.display = "none";
+        async function loadCampaignCount() {
+            if (!contract) return;
             try {
                 const count = (await contract.getCampaignCount()).toNumber();
+                document.getElementById('statCampaigns').textContent = count;
+            } catch (e) { }
+        }
+
+        /* ── Load Campaigns ── */
+        async function loadAllCampaigns() {
+            if (!contract) { showStatusMsg('loadStatus', 'error', 'Connect your wallet first.'); return; }
+            const btn = document.getElementById('loadBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Loading...';
+            document.getElementById('loadStatus').style.display = 'none';
+            try {
+                const count = (await contract.getCampaignCount()).toNumber();
+                document.getElementById('statCampaigns').textContent = count;
                 if (count === 0) {
-                    document.getElementById("campaignsArea").innerHTML = `<div class="empty-state"><div class="empty-icon">&#9635;</div>No campaigns created yet. Be the first!</div>`;
-                    document.getElementById("campaignCount").textContent = "";
+                    document.getElementById('campaignsArea').innerHTML = '<div class="empty-state"><div class="empty-icon">◫</div>No campaigns yet — be the first!</div>';
+                    document.getElementById('campaignCountLabel').textContent = 'No campaigns created yet.';
                     return;
                 }
-                document.getElementById("campaignCount").textContent = count + " total";
+                document.getElementById('campaignCountLabel').textContent = count + ' campaign' + (count !== 1 ? 's' : '') + ' on-chain';
                 const promises = [];
                 for (let i = 0; i < count; i++) promises.push(contract.campaigns(i));
                 const all = await Promise.all(promises);
-                const html = all.map((c, i) => buildCampaignCard(i, c)).join("");
-                document.getElementById("campaignsArea").innerHTML = '<div class="campaigns-grid">' + html + '</div>';
+                const html = all.map((c, i) => buildCard(i, c)).join('');
+                document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
             } catch (err) {
-                showStatus("loadStatus", "error", "Failed to load: " + (err.reason || err.message));
+                showStatusMsg('loadStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = "Refresh";
+                btn.innerHTML = '↻ Refresh';
             }
         }
 
-        function buildCampaignCard(id, c) {
+        function buildCard(id, c) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
             const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
             const now = Math.floor(Date.now() / 1000);
             const isActive = now < c.deadline.toNumber();
             const reached = raised >= goal;
-            const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString();
-
-            let badgeHtml;
-            if (c.withdrawn) badgeHtml = '<span class="badge badge-success">Withdrawn</span>';
-            else if (reached) badgeHtml = '<span class="badge badge-success">Goal reached</span>';
-            else if (isActive) badgeHtml = '<span class="badge badge-active">Active</span>';
-            else badgeHtml = '<span class="badge badge-ended">Ended</span>';
-
-            const fillClass = reached ? "ci-fill reached" : "ci-fill";
+            const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            let badge;
+            if (c.withdrawn) badge = '<span class="badge badge-success">⬡ Withdrawn</span>';
+            else if (reached) badge = '<span class="badge badge-success">✓ Goal Reached</span>';
+            else if (isActive) badge = '<span class="badge badge-active">● Active</span>';
+            else badge = '<span class="badge badge-ended">◌ Ended</span>';
+            const fillClass = reached ? 'cmp-fill reached' : 'cmp-fill';
             const canContrib = isActive && !c.withdrawn;
-            const toggleLabel = canContrib ? "Contribute" : "Closed";
-
             return `
-        <div class="campaign-item" id="card-${id}">
-            <div class="ci-main">
-                <div class="ci-header">
-                    <div>
-                        <div class="ci-id">Campaign #${id}</div>
-                        <div class="ci-title">${escHtml(c.title)}</div>
-                    </div>
-                    ${badgeHtml}
-                </div>
-                <div class="ci-desc">${escHtml(c.description)}</div>
-                <div class="ci-progress-label">
-                    <span>${raised.toFixed(4)} ETH raised</span>
-                    <span>${pct}% of goal</span>
-                </div>
-                <div class="ci-track">
-                    <div class="${fillClass}" style="width:${pct}%"></div>
-                </div>
-                <div class="ci-meta">
-                    <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
-                    <span>Deadline: <b>${deadline}</b></span>
-                    <span>Raised: <b>${raised.toFixed(4)} ETH</b></span>
-                </div>
-            </div>
-
-            <div class="ci-contribute" id="panel-${id}">
-                <div class="ci-contribute-row">
-                    <div class="field">
-                        <label>Amount to contribute</label>
-                        <div class="input-wrap">
-                            <input type="number" id="amt-${id}" placeholder="0.5" style="padding-right:40px">
-                            <span class="input-suffix">ETH</span>
-                        </div>
-                    </div>
-                    <button class="contribute-inline-btn" id="cbtn-${id}" onclick="contributeInline(${id})">
-                        Send ETH
-                    </button>
-                </div>
-                <div class="ci-contribute-status" id="cstatus-${id}"></div>
-            </div>
-
-            <div class="ci-footer">
-                <span class="ci-creator">Creator: ${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</span>
-                <button class="toggle-btn ${canContrib ? '' : ''}"
-                    id="toggle-${id}"
-                    onclick="toggleContribute(${id})"
-                    ${canContrib ? '' : 'disabled'}>
-                    ${toggleLabel}
-                </button>
-            </div>
-        </div>`;
+<div class="cmp-card" id="card-${id}">
+  <div class="cmp-body">
+    <div class="cmp-top">
+      <div>
+        <div class="cmp-id">Campaign #${id}</div>
+        <div class="cmp-title">${escHtml(c.title)}</div>
+      </div>
+      ${badge}
+    </div>
+    <div class="cmp-desc">${escHtml(c.description)}</div>
+    <div class="cmp-progress-label">
+      <span>${raised.toFixed(4)} ETH raised</span>
+      <span>${pct}% of ${goal.toFixed(4)} ETH</span>
+    </div>
+    <div class="cmp-track"><div class="${fillClass}" style="width:${pct}%"></div></div>
+    <div class="cmp-meta">
+      <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
+      <span>Deadline: <b>${deadline}</b></span>
+      <span>Backers: <b>—</b></span>
+    </div>
+  </div>
+  <div class="cmp-contribute-panel" id="panel-${id}">
+    <div class="contrib-row">
+      <div class="field">
+        <label>Amount to contribute</label>
+        <div class="input-wrap">
+          <input type="number" id="amt-${id}" placeholder="0.05">
+          <span class="input-sfx">ETH</span>
+        </div>
+      </div>
+      <button class="btn-send" id="cbtn-${id}" onclick="contributeInline(${id})">Send ETH</button>
+    </div>
+    <div class="inline-status" id="cstatus-${id}"></div>
+  </div>
+  <div class="cmp-footer">
+    <span class="cmp-creator">Creator: ${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</span>
+    <button class="btn-toggle" id="toggle-${id}" onclick="toggleContrib(${id})" ${canContrib ? '' : 'disabled'}>
+      ${canContrib ? 'Contribute' : 'Closed'}
+    </button>
+  </div>
+</div>`;
         }
 
-        function toggleContribute(id) {
-            const panel = document.getElementById("panel-" + id);
-            const btn = document.getElementById("toggle-" + id);
-            const isOpen = panel.classList.contains("open");
-            panel.classList.toggle("open");
-            btn.textContent = isOpen ? "Contribute" : "Cancel";
-            btn.classList.toggle("active", !isOpen);
+        function toggleContrib(id) {
+            const panel = document.getElementById('panel-' + id);
+            const btn = document.getElementById('toggle-' + id);
+            const isOpen = panel.classList.contains('open');
+            panel.classList.toggle('open');
+            btn.textContent = isOpen ? 'Contribute' : 'Cancel';
+            btn.classList.toggle('open', !isOpen);
         }
 
         async function contributeInline(id) {
-            const amtInput = document.getElementById("amt-" + id);
-            const amount = amtInput.value.trim();
-            const btn = document.getElementById("cbtn-" + id);
-            const statusEl = document.getElementById("cstatus-" + id);
-
-            if (!amount || parseFloat(amount) <= 0) {
-                showInlineStatus(statusEl, "error", "Enter a valid amount.");
-                return;
-            }
-
+            const amtEl = document.getElementById('amt-' + id);
+            const amount = amtEl.value.trim();
+            const btn = document.getElementById('cbtn-' + id);
+            const statEl = document.getElementById('cstatus-' + id);
+            if (!amount || parseFloat(amount) <= 0) { setInlineStatus(statEl, 'error', 'Enter a valid amount.'); return; }
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>Sending...';
-            showInlineStatus(statusEl, "loading", "Waiting for MetaMask confirmation...");
-
+            setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
             try {
                 const tx = await contract.contribute(id, { value: ethers.utils.parseEther(amount) });
-                showInlineStatus(statusEl, "loading", "Transaction sent — confirming...");
+                setInlineStatus(statEl, 'loading', 'Confirming transaction…');
                 await tx.wait();
-                showInlineStatus(statusEl, "success", "Contributed " + amount + " ETH successfully!");
-                amtInput.value = "";
-                await loadAllCampaigns(); // refresh all cards
-            } catch (err) {
-                showInlineStatus(statusEl, "error", err.reason || err.message);
-                btn.disabled = false;
-                btn.innerHTML = "Send ETH";
-            }
-        }
-
-        function showInlineStatus(el, type, message) {
-            const colors = {
-                success: { bg: "#f0fdf4", border: "#bbf7d0", color: "#166534" },
-                error: { bg: "#fef2f2", border: "#fecaca", color: "#991b1b" },
-                loading: { bg: "#eff6ff", border: "#bfdbfe", color: "#1e40af" }
-            };
-            const s = colors[type];
-            el.style.display = "block";
-            el.style.background = s.bg;
-            el.style.border = "1px solid " + s.border;
-            el.style.color = s.color;
-            el.textContent = message;
-        }
-
-        // ── Create Campaign ─────────────────────────────────────
-        async function createCampaign() {
-            if (!contract) { showStatus("createStatus", "error", "Connect your wallet first."); return; }
-            const title = document.getElementById("title").value.trim();
-            const description = document.getElementById("description").value.trim();
-            const goal = document.getElementById("goal").value;
-            const duration = document.getElementById("duration").value;
-            if (!title || !description || !goal || !duration) { showStatus("createStatus", "error", "Please fill in all fields."); return; }
-            const btn = document.getElementById("createBtn");
-            setLoading(btn, true, "Creating...");
-            showStatus("createStatus", "loading", "Waiting for MetaMask confirmation...");
-            try {
-                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), duration);
-                showStatus("createStatus", "loading", "Transaction sent — waiting for confirmation...");
-                const receipt = await tx.wait();
-                showStatus("createStatus", "success", "Campaign created! Tx: " + receipt.transactionHash.slice(0, 20) + "...");
-                ["title", "description", "goal", "duration"].forEach(id => document.getElementById(id).value = "");
+                setInlineStatus(statEl, 'success', '✓ Contributed ' + amount + ' ETH successfully!');
+                amtEl.value = '';
                 await loadAllCampaigns();
             } catch (err) {
-                showStatus("createStatus", "error", err.reason || err.message);
-            } finally {
-                setLoading(btn, false, "Create Campaign");
+                setInlineStatus(statEl, 'error', err.reason || err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Send ETH';
             }
         }
 
-        // ── Helpers ─────────────────────────────────────────────
-        function showStatus(id, type, message) {
-            const el = document.getElementById(id);
-            el.className = "status-bar status-" + type;
-            el.style.display = "block";
-            el.innerText = message;
+        function setInlineStatus(el, type, msg) {
+            const styles = {
+                success: { bg: 'rgba(0,201,167,0.08)', border: 'rgba(0,201,167,0.2)', color: 'var(--teal)' },
+                error: { bg: 'rgba(255,90,90,0.08)', border: 'rgba(255,90,90,0.2)', color: 'var(--red)' },
+                loading: { bg: 'rgba(79,154,255,0.08)', border: 'rgba(79,154,255,0.2)', color: '#4f9aff' },
+            };
+            const s = styles[type];
+            el.style.cssText = `display:block;background:${s.bg};border:1px solid ${s.border};color:${s.color};`;
+            el.textContent = msg;
         }
 
-        function setLoading(btn, loading, label) {
-            btn.disabled = loading;
-            btn.innerHTML = loading ? '<span class="spinner"></span>' + label : label;
+        /* ── Create Campaign ── */
+        async function createCampaign() {
+            if (!contract) { showStatusMsg('createStatus', 'error', 'Connect your wallet first.'); return; }
+            const title = document.getElementById('title').value.trim();
+            const description = document.getElementById('description').value.trim();
+            const goal = document.getElementById('goal').value;
+            const duration = document.getElementById('duration').value;
+            if (!title || !description || !goal || !duration) { showStatusMsg('createStatus', 'error', 'Please fill in all fields.'); return; }
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner" style="border-top-color:#fff;border-color:rgba(255,255,255,0.3);"></span>Deploying…';
+            showStatusMsg('createStatus', 'loading', 'Waiting for MetaMask confirmation…');
+            try {
+                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), duration);
+                showStatusMsg('createStatus', 'loading', 'Transaction sent — awaiting confirmation…');
+                const receipt = await tx.wait();
+                showStatusMsg('createStatus', 'success', '✓ Campaign deployed! Tx: ' + receipt.transactionHash.slice(0, 22) + '…');
+                ['title', 'description', 'goal', 'duration'].forEach(id => document.getElementById(id).value = '');
+                await loadCampaignCount();
+            } catch (err) {
+                showStatusMsg('createStatus', 'error', err.reason || err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Deploy Campaign →';
+            }
+        }
+
+        /* ── Helpers ── */
+        function showStatusMsg(id, type, msg) {
+            const el = document.getElementById(id);
+            const styles = {
+                success: { bg: 'rgba(0,201,167,0.08)', border: 'rgba(0,201,167,0.2)', color: 'var(--teal)' },
+                error: { bg: 'rgba(255,90,90,0.08)', border: 'rgba(255,90,90,0.2)', color: 'var(--red)' },
+                loading: { bg: 'rgba(79,154,255,0.08)', border: 'rgba(79,154,255,0.2)', color: '#4f9aff' },
+            };
+            const s = styles[type];
+            el.style.cssText = `display:block;background:${s.bg};border:1px solid ${s.border};color:${s.color};`;
+            el.textContent = msg;
         }
 
         function escHtml(str) {
-            return (str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
     </script>
 </body>
