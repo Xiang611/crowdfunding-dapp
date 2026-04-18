@@ -828,7 +828,7 @@
             font-size: 12px;
         }
 
-        /* ── ADDED: Withdraw and Refund button styles ── */
+        /* ── Withdraw and Refund button styles ── */
         .btn-withdraw {
             font-size: 12px;
             font-weight: 500;
@@ -903,8 +903,13 @@
             margin-bottom: 8px;
         }
 
-        .panel-label-gold { color: var(--gold); }
-        .panel-label-red  { color: var(--red); }
+        .panel-label-gold {
+            color: var(--gold);
+        }
+
+        .panel-label-red {
+            color: var(--red);
+        }
 
         .panel-desc {
             font-size: 12px;
@@ -1004,7 +1009,7 @@
             background: var(--bg3);
             border: 1px solid var(--border2);
             border-radius: var(--radius-sm);
-            padding: 10px 40px 10px 14px;
+            padding: 10px 14px;
             font-size: 13px;
             color: var(--text);
             font-family: var(--ff-body);
@@ -1019,6 +1024,72 @@
 
         .form-field input::placeholder {
             color: var(--text3);
+        }
+
+        /* ── Duration row with unit toggle ── */
+        .duration-row {
+            display: flex;
+            gap: 8px;
+            align-items: stretch;
+        }
+
+        .duration-row input {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .unit-toggle {
+            display: flex;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background: var(--bg3);
+            flex-shrink: 0;
+        }
+
+        .unit-btn {
+            padding: 0 12px;
+            font-size: 12px;
+            font-weight: 500;
+            font-family: var(--ff-body);
+            color: var(--text3);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            white-space: nowrap;
+            border-right: 1px solid var(--border2);
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        .unit-btn:last-child {
+            border-right: none;
+        }
+
+        .unit-btn:hover {
+            color: var(--text);
+            background: var(--bg2);
+        }
+
+        .unit-btn.active {
+            background: var(--gold);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        /* Duration preview hint */
+        .duration-hint {
+            font-size: 11px;
+            color: var(--text3);
+            margin-top: 5px;
+            min-height: 16px;
+            transition: color var(--transition);
+        }
+
+        .duration-hint.warn {
+            color: #e07b0a;
         }
 
         .btn-create {
@@ -1305,11 +1376,6 @@
             margin-right: 5px;
         }
 
-        .spinner-white {
-            border-color: rgba(255, 255, 255, 0.3);
-            border-top-color: var(--text);
-        }
-
         @keyframes spin {
             to {
                 transform: rotate(360deg);
@@ -1374,6 +1440,11 @@
 
             .stats-bar {
                 grid-template-columns: 1fr;
+            }
+
+            .unit-btn {
+                padding: 0 8px;
+                font-size: 11px;
             }
         }
 
@@ -1513,9 +1584,7 @@
             <div class="load-bar">
                 <span class="load-bar-text" id="campaignCountLabel">Connect your wallet and load campaigns to get
                     started.</span>
-                <button class="btn-load" id="loadBtn" onclick="loadAllCampaigns()">
-                    Load Campaigns
-                </button>
+                <button class="btn-load" id="loadBtn" onclick="loadAllCampaigns()">Load Campaigns</button>
             </div>
 
             <div id="campaignsArea">
@@ -1559,16 +1628,22 @@
                     <div class="form-field">
                         <label>Funding Goal</label>
                         <div class="input-wrap">
-                            <input type="number" id="goal" placeholder="1.0">
+                            <input type="number" id="goal" placeholder="1.0" style="padding-right:38px;">
                             <span class="input-sfx">ETH</span>
                         </div>
                     </div>
                     <div class="form-field">
                         <label>Duration</label>
-                        <div class="input-wrap">
-                            <input type="number" id="duration" placeholder="7">
-                            <span class="input-sfx">days</span>
+                        <!-- Duration input + unit toggle buttons -->
+                        <div class="duration-row">
+                            <input type="number" id="duration" placeholder="7" min="1" oninput="updateDurationHint()">
+                            <div class="unit-toggle">
+                                <button class="unit-btn" id="unit-min" onclick="setUnit('minutes')">min</button>
+                                <button class="unit-btn" id="unit-hour" onclick="setUnit('hours')">hr</button>
+                                <button class="unit-btn active" id="unit-day" onclick="setUnit('days')">day</button>
+                            </div>
                         </div>
+                        <div class="duration-hint" id="durationHint">≈ 7 days</div>
                     </div>
                 </div>
 
@@ -1707,9 +1782,58 @@
         let provider, signer, contract;
         let currentUserAddress = null;
 
-        const contractAddress = "0x42Bf2bB15Cd9457528DCc43887Cca1aA93aFA843";
+        // ── Duration unit state ──
+        let durationUnit = 'days'; // 'minutes' | 'hours' | 'days'
 
-        // ADDED: withdraw and refund added to ABI
+        function setUnit(unit) {
+            durationUnit = unit;
+            document.querySelectorAll('.unit-btn').forEach(b => b.classList.remove('active'));
+            const map = { minutes: 'unit-min', hours: 'unit-hour', days: 'unit-day' };
+            document.getElementById(map[unit]).classList.add('active');
+            updateDurationHint();
+        }
+
+        function updateDurationHint() {
+            const val = parseFloat(document.getElementById('duration').value);
+            const hint = document.getElementById('durationHint');
+            if (!val || val <= 0) { hint.textContent = ''; hint.className = 'duration-hint'; return; }
+            const totalMinutes = durationUnit === 'minutes' ? val
+                : durationUnit === 'hours' ? val * 60
+                    : val * 1440;
+            const totalDays = Math.ceil(totalMinutes / 1440);
+
+            if (durationUnit === 'days') {
+                hint.textContent = val === 1 ? '≈ 1 day' : `≈ ${val} days`;
+                hint.className = 'duration-hint';
+            } else if (durationUnit === 'hours') {
+                const d = Math.floor(val / 24), h = val % 24;
+                const parts = [];
+                if (d) parts.push(d + 'd');
+                if (h) parts.push(h + 'h');
+                hint.textContent = parts.join(' ') + (totalDays < 1 ? ' — rounds up to 1 day on-chain' : ` → ${totalDays}d on-chain`);
+                hint.className = totalDays < 1 ? 'duration-hint warn' : 'duration-hint';
+            } else {
+                const h = Math.floor(val / 60), m = val % 60;
+                const parts = [];
+                if (h) parts.push(h + 'h');
+                if (m) parts.push(m + 'min');
+                hint.textContent = parts.join(' ') + (totalDays < 1 ? ' — rounds up to 1 day on-chain' : ` → ${totalDays}d on-chain`);
+                hint.className = totalDays < 1 ? 'duration-hint warn' : 'duration-hint';
+            }
+        }
+
+        /** Convert the user's duration input to whole days for the smart contract */
+        function getDurationInDays() {
+            const val = parseFloat(document.getElementById('duration').value);
+            if (!val || val <= 0) return null;
+            const totalMinutes = durationUnit === 'minutes' ? val
+                : durationUnit === 'hours' ? val * 60
+                    : val * 1440;
+            return Math.max(1, Math.ceil(totalMinutes / 1440));
+        }
+
+        const contractAddress = "0x2b7d13a9E579baFaf1592A16d192b3e0ba5865De";
+
         const abi = [
             "function createCampaign(string title, string description, uint goal, uint durationInDays)",
             "function contribute(uint id) payable",
@@ -1726,10 +1850,9 @@
             document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => t.classList.remove('active'));
             document.getElementById('page-' + name).classList.add('active');
             document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => {
-                if (t.textContent.trim().toLowerCase().startsWith(name === 'home' ? 'home' :
-                    name === 'campaigns' ? 'camp' : name === 'create' ? 'create' : 'about')) {
-                    t.classList.add('active');
-                }
+                if (t.textContent.trim().toLowerCase().startsWith(
+                    name === 'home' ? 'home' : name === 'campaigns' ? 'camp' : name === 'create' ? 'create' : 'about'
+                )) t.classList.add('active');
             });
             window.scrollTo(0, 0);
         }
@@ -1741,7 +1864,7 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 const address = await signer.getAddress();
-                currentUserAddress = address; // ADDED: track current user
+                currentUserAddress = address;
                 contract = new ethers.Contract(contractAddress, abi, signer);
                 setWalletUI(address);
                 loadCampaignCount();
@@ -1752,7 +1875,7 @@
 
         function disconnectWallet() {
             provider = null; signer = null; contract = null;
-            currentUserAddress = null; // ADDED: clear user address
+            currentUserAddress = null;
             document.getElementById('walletPill').style.display = 'none';
             document.getElementById('logoutBtn').style.display = 'none';
             const cb = document.getElementById('connectBtn');
@@ -1802,7 +1925,6 @@
                 for (let i = 0; i < count; i++) promises.push(contract.campaigns(i));
                 const all = await Promise.all(promises);
 
-                // ADDED: fetch user contributions for each campaign
                 const contribPromises = all.map((_, i) => contract.contributions(i, currentUserAddress));
                 const contribs = await Promise.all(contribPromises);
 
@@ -1816,7 +1938,6 @@
             }
         }
 
-        // ADDED: myContrib parameter added to buildCard
         function buildCard(id, c, myContrib) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
@@ -1835,13 +1956,10 @@
 
             const fillClass = reached ? 'cmp-fill reached' : 'cmp-fill';
             const canContrib = isActive && !c.withdrawn;
-
-            // ADDED: determine who can withdraw or refund
             const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
             const canWithdraw = isCreator && reached && !c.withdrawn && !isActive;
             const canRefund = myEth > 0 && !isActive && !reached;
 
-            // ADDED: withdraw panel HTML
             const withdrawPanel = canWithdraw ? `
             <div class="cmp-withdraw-panel" id="wpanel-${id}">
                 <div class="panel-label panel-label-gold">Withdraw Funds</div>
@@ -1850,7 +1968,6 @@
                 <div class="inline-status" id="wstatus-${id}"></div>
             </div>` : '';
 
-            // ADDED: refund panel HTML
             const refundPanel = canRefund ? `
             <div class="cmp-refund-panel" id="rpanel-${id}">
                 <div class="panel-label panel-label-red">Claim Refund</div>
@@ -1903,7 +2020,7 @@
         ${canContrib ? 'Contribute' : 'Closed'}
       </button>
       ${canWithdraw ? `<button class="btn-withdraw" onclick="toggleWithdraw(${id})">Withdraw</button>` : ''}
-      ${canRefund   ? `<button class="btn-refund"   onclick="toggleRefund(${id})">Get Refund</button>` : ''}
+      ${canRefund ? `<button class="btn-refund"   onclick="toggleRefund(${id})">Get Refund</button>` : ''}
     </div>
   </div>
 </div>`;
@@ -1918,13 +2035,11 @@
             btn.classList.toggle('open', !isOpen);
         }
 
-        // ADDED: toggle withdraw panel
         function toggleWithdraw(id) {
             const panel = document.getElementById('wpanel-' + id);
             if (panel) panel.classList.toggle('open');
         }
 
-        // ADDED: toggle refund panel
         function toggleRefund(id) {
             const panel = document.getElementById('rpanel-' + id);
             if (panel) panel.classList.toggle('open');
@@ -1953,7 +2068,6 @@
             }
         }
 
-        // ADDED: doWithdraw function
         async function doWithdraw(id) {
             const btn = document.getElementById('wbtn-' + id);
             const statEl = document.getElementById('wstatus-' + id);
@@ -1973,7 +2087,6 @@
             }
         }
 
-        // ADDED: doRefund function
         async function doRefund(id) {
             const btn = document.getElementById('rbtn-' + id);
             const statEl = document.getElementById('rstatus-' + id);
@@ -2010,18 +2123,24 @@
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('description').value.trim();
             const goal = document.getElementById('goal').value;
-            const duration = document.getElementById('duration').value;
-            if (!title || !description || !goal || !duration) { showStatusMsg('createStatus', 'error', 'Please fill in all fields.'); return; }
+            const durationDays = getDurationInDays();
+
+            if (!title || !description || !goal || !durationDays) {
+                showStatusMsg('createStatus', 'error', 'Please fill in all fields.');
+                return;
+            }
+
             const btn = document.getElementById('createBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner" style="border-top-color:#fff;border-color:rgba(255,255,255,0.3);"></span>Deploying…';
             showStatusMsg('createStatus', 'loading', 'Waiting for MetaMask confirmation…');
             try {
-                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), duration);
+                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), durationDays);
                 showStatusMsg('createStatus', 'loading', 'Transaction sent — awaiting confirmation…');
                 const receipt = await tx.wait();
                 showStatusMsg('createStatus', 'success', '✓ Campaign deployed! Tx: ' + receipt.transactionHash.slice(0, 22) + '…');
                 ['title', 'description', 'goal', 'duration'].forEach(id => document.getElementById(id).value = '');
+                document.getElementById('durationHint').textContent = '';
                 await loadCampaignCount();
             } catch (err) {
                 showStatusMsg('createStatus', 'error', err.reason || err.message);
@@ -2047,6 +2166,9 @@
         function escHtml(str) {
             return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         }
+
+        // Initialise hint with default
+        updateDurationHint();
     </script>
 </body>
 
