@@ -1707,7 +1707,7 @@
         let provider, signer, contract;
         let currentUserAddress = null;
 
-        const contractAddress = "0x42Bf2bB15Cd9457528DCc43887Cca1aA93aFA843";
+        const contractAddress = "0x783B25F4c512d82B4ea40227DA2D4AB4350433d2";
 
         // ADDED: withdraw and refund added to ABI
         const abi = [
@@ -1838,7 +1838,7 @@
 
             // ADDED: determine who can withdraw or refund
             const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
-            const canWithdraw = isCreator && reached && !c.withdrawn && !isActive;
+            const canWithdraw = isCreator && reached && !c.withdrawn;
             const canRefund = myEth > 0 && !isActive && !reached;
 
             // ADDED: withdraw panel HTML

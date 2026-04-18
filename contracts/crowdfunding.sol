@@ -102,8 +102,7 @@ contract Crowdfunding {
 
         c.withdrawn = true;
         uint amount = c.amountRaised;
-        (bool success, ) = payable(c.creator).call{value: amount}("");
-        require(success, "Transfer failed");
+        payable(c.creator).transfer(amount);
         emit Withdrawn(id, c.creator, amount);
     }
 
@@ -116,8 +115,7 @@ contract Crowdfunding {
         require(amount > 0, "No contribution to refund");
 
         contributions[id][msg.sender] = 0;
-        (bool success, ) = payable(msg.sender).call{value: amount}("");
-        require(success, "Transfer failed");
+        payable(msg.sender).transfer(amount);
         emit Refunded(id, msg.sender, amount);
     }
 
