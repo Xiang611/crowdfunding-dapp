@@ -20,6 +20,28 @@ contract Crowdfunding {
         bool withdrawn;
     }
 
+    struct User {
+        string name;
+        string email;
+        bool registered;
+    }
+
+    mapping(address => User) public users;
+
+    function registerUser(string memory _name, string memory _email) public {
+        require(!users[msg.sender].registered, "Already registered");
+
+        users[msg.sender] = User({
+            name: _name,
+            email: _email,
+            registered: true
+        });
+    }
+
+    function isRegistered(address user) public view returns (bool) {
+        return users[user].registered;
+    }
+
     Campaign[] public campaigns;
 
     mapping(uint => mapping(address => uint)) public contributions;
