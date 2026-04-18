@@ -696,6 +696,8 @@
             justify-content: space-between;
             align-items: center;
             background: var(--bg3);
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .cmp-creator {
@@ -824,6 +826,126 @@
             border-radius: var(--radius-sm);
             padding: 8px 12px;
             font-size: 12px;
+        }
+
+        /* ── ADDED: Withdraw and Refund button styles ── */
+        .btn-withdraw {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gold);
+            background: var(--gold-dim);
+            border: 1px solid var(--gold-glow);
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            transition: var(--transition);
+        }
+
+        .btn-withdraw:hover {
+            background: rgba(212, 136, 10, 0.18);
+        }
+
+        .btn-withdraw:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .btn-refund {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--red);
+            background: rgba(220, 38, 38, 0.08);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            border-radius: 6px;
+            padding: 6px 14px;
+            cursor: pointer;
+            font-family: var(--ff-body);
+            transition: var(--transition);
+        }
+
+        .btn-refund:hover {
+            background: rgba(220, 38, 38, 0.15);
+        }
+
+        .btn-refund:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .cmp-withdraw-panel {
+            display: none;
+            padding: 1.125rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--gold-dim);
+        }
+
+        .cmp-withdraw-panel.open {
+            display: block;
+        }
+
+        .cmp-refund-panel {
+            display: none;
+            padding: 1.125rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: rgba(220, 38, 38, 0.05);
+        }
+
+        .cmp-refund-panel.open {
+            display: block;
+        }
+
+        .panel-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .panel-label-gold { color: var(--gold); }
+        .panel-label-red  { color: var(--red); }
+
+        .panel-desc {
+            font-size: 12px;
+            color: var(--text2);
+            margin-bottom: 12px;
+            line-height: 1.6;
+        }
+
+        .btn-action-full {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 600;
+            font-family: var(--ff-body);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-action-full:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-do-withdraw {
+            background: var(--gold);
+            color: #fff;
+        }
+
+        .btn-do-withdraw:hover:not(:disabled) {
+            background: #b8760a;
+        }
+
+        .btn-do-refund {
+            background: var(--red);
+            color: #fff;
+        }
+
+        .btn-do-refund:hover:not(:disabled) {
+            background: #b91c1c;
         }
 
         /* ── CREATE ──────────────────────────────────────────────── */
@@ -1583,12 +1705,19 @@
 
     <script>
         let provider, signer, contract;
+        let currentUserAddress = null;
+
         const contractAddress = "0x42Bf2bB15Cd9457528DCc43887Cca1aA93aFA843";
+
+        // ADDED: withdraw and refund added to ABI
         const abi = [
             "function createCampaign(string title, string description, uint goal, uint durationInDays)",
             "function contribute(uint id) payable",
+            "function withdraw(uint id)",
+            "function refund(uint id)",
             "function campaigns(uint) view returns (address creator, string title, string description, uint goal, uint deadline, uint amountRaised, bool withdrawn)",
-            "function getCampaignCount() view returns (uint)"
+            "function getCampaignCount() view returns (uint)",
+            "function contributions(uint, address) view returns (uint)"
         ];
 
         /* ── Tab navigation ── */
@@ -1612,6 +1741,7 @@
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
                 const address = await signer.getAddress();
+                currentUserAddress = address; // ADDED: track current user
                 contract = new ethers.Contract(contractAddress, abi, signer);
                 setWalletUI(address);
                 loadCampaignCount();
@@ -1622,6 +1752,7 @@
 
         function disconnectWallet() {
             provider = null; signer = null; contract = null;
+            currentUserAddress = null; // ADDED: clear user address
             document.getElementById('walletPill').style.display = 'none';
             document.getElementById('logoutBtn').style.display = 'none';
             const cb = document.getElementById('connectBtn');
@@ -1666,10 +1797,16 @@
                     return;
                 }
                 document.getElementById('campaignCountLabel').textContent = count + ' campaign' + (count !== 1 ? 's' : '') + ' on-chain';
+
                 const promises = [];
                 for (let i = 0; i < count; i++) promises.push(contract.campaigns(i));
                 const all = await Promise.all(promises);
-                const html = all.map((c, i) => buildCard(i, c)).join('');
+
+                // ADDED: fetch user contributions for each campaign
+                const contribPromises = all.map((_, i) => contract.contributions(i, currentUserAddress));
+                const contribs = await Promise.all(contribPromises);
+
+                const html = all.map((c, i) => buildCard(i, c, contribs[i])).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
@@ -1679,21 +1816,49 @@
             }
         }
 
-        function buildCard(id, c) {
+        // ADDED: myContrib parameter added to buildCard
+        function buildCard(id, c, myContrib) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
+            const myEth = parseFloat(ethers.utils.formatEther(myContrib || 0));
             const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
             const now = Math.floor(Date.now() / 1000);
             const isActive = now < c.deadline.toNumber();
             const reached = raised >= goal;
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+
             let badge;
             if (c.withdrawn) badge = '<span class="badge badge-success">⬡ Withdrawn</span>';
             else if (reached) badge = '<span class="badge badge-success">✓ Goal Reached</span>';
             else if (isActive) badge = '<span class="badge badge-active">● Active</span>';
             else badge = '<span class="badge badge-ended">◌ Ended</span>';
+
             const fillClass = reached ? 'cmp-fill reached' : 'cmp-fill';
             const canContrib = isActive && !c.withdrawn;
+
+            // ADDED: determine who can withdraw or refund
+            const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
+            const canWithdraw = isCreator && reached && !c.withdrawn && !isActive;
+            const canRefund = myEth > 0 && !isActive && !reached;
+
+            // ADDED: withdraw panel HTML
+            const withdrawPanel = canWithdraw ? `
+            <div class="cmp-withdraw-panel" id="wpanel-${id}">
+                <div class="panel-label panel-label-gold">Withdraw Funds</div>
+                <div class="panel-desc">Your campaign reached its goal. Withdraw <b>${raised.toFixed(4)} ETH</b> to your wallet.</div>
+                <button class="btn-action-full btn-do-withdraw" id="wbtn-${id}" onclick="doWithdraw(${id})">Withdraw ${raised.toFixed(4)} ETH</button>
+                <div class="inline-status" id="wstatus-${id}"></div>
+            </div>` : '';
+
+            // ADDED: refund panel HTML
+            const refundPanel = canRefund ? `
+            <div class="cmp-refund-panel" id="rpanel-${id}">
+                <div class="panel-label panel-label-red">Claim Refund</div>
+                <div class="panel-desc">This campaign did not reach its goal. Claim back your <b>${myEth.toFixed(4)} ETH</b>.</div>
+                <button class="btn-action-full btn-do-refund" id="rbtn-${id}" onclick="doRefund(${id})">Refund ${myEth.toFixed(4)} ETH</button>
+                <div class="inline-status" id="rstatus-${id}"></div>
+            </div>` : '';
+
             return `
 <div class="cmp-card" id="card-${id}">
   <div class="cmp-body">
@@ -1729,11 +1894,17 @@
     </div>
     <div class="inline-status" id="cstatus-${id}"></div>
   </div>
+  ${withdrawPanel}
+  ${refundPanel}
   <div class="cmp-footer">
     <span class="cmp-creator">Creator: ${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</span>
-    <button class="btn-toggle" id="toggle-${id}" onclick="toggleContrib(${id})" ${canContrib ? '' : 'disabled'}>
-      ${canContrib ? 'Contribute' : 'Closed'}
-    </button>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-toggle" id="toggle-${id}" onclick="toggleContrib(${id})" ${canContrib ? '' : 'disabled'}>
+        ${canContrib ? 'Contribute' : 'Closed'}
+      </button>
+      ${canWithdraw ? `<button class="btn-withdraw" onclick="toggleWithdraw(${id})">Withdraw</button>` : ''}
+      ${canRefund   ? `<button class="btn-refund"   onclick="toggleRefund(${id})">Get Refund</button>` : ''}
+    </div>
   </div>
 </div>`;
         }
@@ -1745,6 +1916,18 @@
             panel.classList.toggle('open');
             btn.textContent = isOpen ? 'Contribute' : 'Cancel';
             btn.classList.toggle('open', !isOpen);
+        }
+
+        // ADDED: toggle withdraw panel
+        function toggleWithdraw(id) {
+            const panel = document.getElementById('wpanel-' + id);
+            if (panel) panel.classList.toggle('open');
+        }
+
+        // ADDED: toggle refund panel
+        function toggleRefund(id) {
+            const panel = document.getElementById('rpanel-' + id);
+            if (panel) panel.classList.toggle('open');
         }
 
         async function contributeInline(id) {
@@ -1767,6 +1950,46 @@
                 setInlineStatus(statEl, 'error', err.reason || err.message);
                 btn.disabled = false;
                 btn.innerHTML = 'Send ETH';
+            }
+        }
+
+        // ADDED: doWithdraw function
+        async function doWithdraw(id) {
+            const btn = document.getElementById('wbtn-' + id);
+            const statEl = document.getElementById('wstatus-' + id);
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Withdrawing...';
+            setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
+            try {
+                const tx = await contract.withdraw(id);
+                setInlineStatus(statEl, 'loading', 'Confirming transaction…');
+                await tx.wait();
+                setInlineStatus(statEl, 'success', '✓ Funds withdrawn to your wallet!');
+                await loadAllCampaigns();
+            } catch (err) {
+                setInlineStatus(statEl, 'error', err.reason || err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Withdraw ETH';
+            }
+        }
+
+        // ADDED: doRefund function
+        async function doRefund(id) {
+            const btn = document.getElementById('rbtn-' + id);
+            const statEl = document.getElementById('rstatus-' + id);
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span>Claiming refund...';
+            setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
+            try {
+                const tx = await contract.refund(id);
+                setInlineStatus(statEl, 'loading', 'Confirming transaction…');
+                await tx.wait();
+                setInlineStatus(statEl, 'success', '✓ Refund sent to your wallet!');
+                await loadAllCampaigns();
+            } catch (err) {
+                setInlineStatus(statEl, 'error', err.reason || err.message);
+                btn.disabled = false;
+                btn.innerHTML = 'Refund ETH';
             }
         }
 

@@ -17,8 +17,10 @@ contract Token {
     }
 
     function mint(address to, uint amount) public {
+        require(msg.sender == crowdfundingContract, "Not authorized");
         balanceOf[to] += amount;
         totalSupply += amount;
+        emit Transfer(address(0), to, amount);
     }
 
     function transfer(address to, uint amount) public returns (bool) {
