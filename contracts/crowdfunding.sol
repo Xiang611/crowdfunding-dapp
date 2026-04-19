@@ -4,10 +4,13 @@ pragma solidity ^0.8.0;
 import "./Token.sol";
 
 contract Crowdfunding {
+    address public owner;
+    uint public platformFeeBalance;
     Token public token;
 
     constructor(address tokenAddress) {
         token = Token(tokenAddress);
+        owner = msg.sender; // ✅ whoever deploys = platform owner
     }
 
     struct Campaign {
@@ -55,23 +58,11 @@ contract Crowdfunding {
         uint deadline
     );
 
-    event Withdrawn(
-        uint campaignId, 
-        address creator, 
-        uint amount
-    );
+    event Withdrawn(uint campaignId, address creator, uint amount);
 
-    event Refunded(
-        uint campaignId, 
-        address contributor,
-        uint amount
-    );
+    event Refunded(uint campaignId, address contributor, uint amount);
 
-    event TokensClaimed(
-        uint campaignId,
-        address contributor, 
-        uint amount
-    );
+    event TokensClaimed(uint campaignId, address contributor, uint amount);
 
     function createCampaign(
         string memory _title,
@@ -80,7 +71,10 @@ contract Crowdfunding {
         uint _durationInSeconds
     ) public {
         require(_goal > 0, "Goal must be > 0");
-        require(_durationInSeconds >= 60, "Duration must be at least 60 seconds");
+        require(
+            _durationInSeconds >= 60,
+            "Duration must be at least 60 seconds"
+        );
 
         uint deadline = block.timestamp + _durationInSeconds;
 
@@ -114,17 +108,48 @@ contract Crowdfunding {
         c.amountRaised += msg.value;
     }
 
-    function withdraw(uint id) public {
+    function withdraw(uint id, bool useCTKDiscount) public {
         require(id < campaigns.length, "Campaign does not exist");
         Campaign storage c = campaigns[id];
         require(msg.sender == c.creator, "Only creator can withdraw");
-        require(c.amountRaised >= c.goal,  "Funding goal not reached");
-        require(!c.withdrawn,              "Already withdrawn");
+        require(c.amountRaised >= c.goal, "Funding goal not reached");
+        require(!c.withdrawn, "Already withdrawn");
 
         c.withdrawn = true;
-        uint amount = c.amountRaised;
-        payable(c.creator).transfer(amount);
-        emit Withdrawn(id, c.creator, amount);
+
+        //Check if creator holds CTK for fee discount
+        uint feePercent;
+        if (useCTKDiscount && token.balanceOf(msg.sender) >= 10 * 1e18) {
+            feePercent = 1; // ✅ only applies if they chose AND have enough CTK
+        } else {
+            feePercent = 3;
+        }
+
+        uint fee = (c.amountRaised * feePercent) / 100;
+        uint creatorAmount = c.amountRaised - fee;
+        platformFeeBalance += fee;
+
+        //Auto-mint CTK to all contributors
+        address[] memory contribs = contributors[id];
+        for (uint i = 0; i < contribs.length; i++) {
+            address contributor = contribs[i];
+
+            if (!tokensClaimed[id][contributor]) {
+                uint contributed = contributions[id][contributor];
+                uint wholeEth = contributed / 1 ether;
+                uint tokensToMint = wholeEth * 1e18;
+
+                if (tokensToMint > 0) {
+                    tokensClaimed[id][contributor] = true;
+                    token.mint(contributor, tokensToMint);
+                    emit TokensClaimed(id, contributor, tokensToMint);
+                }
+            }
+        }
+
+        // Send ETH to creator
+        payable(c.creator).transfer(creatorAmount);
+        emit Withdrawn(id, c.creator, creatorAmount);
     }
 
     function refund(uint id) public {
@@ -147,11 +172,11 @@ contract Crowdfunding {
     function claimTokens(uint id) public {
         require(id < campaigns.length, "Campaign does not exist");
         Campaign storage c = campaigns[id];
-        require(c.amountRaised >= c.goal,          "Campaign did not succeed");
+        require(c.amountRaised >= c.goal, "Campaign did not succeed");
         require(contributions[id][msg.sender] > 0, "No contribution found");
         require(!tokensClaimed[id][msg.sender], "Tokens already claimed");
-        uint contributed  = contributions[id][msg.sender];
-        uint wholeEth     = contributed / 1 ether;
+        uint contributed = contributions[id][msg.sender];
+        uint wholeEth = contributed / 1 ether;
         uint tokensToMint = wholeEth * 1e18;
         require(tokensToMint > 0, "Need at least 1 ETH to earn tokens");
         tokensClaimed[id][msg.sender] = true;
@@ -159,7 +184,26 @@ contract Crowdfunding {
         emit TokensClaimed(id, msg.sender, tokensToMint);
     }
 
-    function getContribution(uint id, address contributor) public view returns (uint) { return contributions[id][contributor]; }
+    function withdrawPlatformFee() public {
+        require(msg.sender == owner, "Only owner");
+        require(platformFeeBalance > 0, "Nothing to withdraw");
 
-    function hasClaimedTokens(uint id, address contributor) public view returns (bool) { return tokensClaimed[id][contributor]; }
+        uint amount = platformFeeBalance;
+        platformFeeBalance = 0;
+        payable(owner).transfer(amount);
+    }
+
+    function getContribution(
+        uint id,
+        address contributor
+    ) public view returns (uint) {
+        return contributions[id][contributor];
+    }
+
+    function hasClaimedTokens(
+        uint id,
+        address contributor
+    ) public view returns (bool) {
+        return tokensClaimed[id][contributor];
+    }
 }

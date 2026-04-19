@@ -6,11 +6,17 @@ contract Token {
     string public symbol = "CTK";
     uint public totalSupply;
     address public crowdfundingContract;
+    address public owner; // ✅ add owner
     mapping(address => uint) public balanceOf;
 
     event Transfer(address indexed from, address indexed to, uint value);
 
+    constructor() {
+        owner = msg.sender; // ✅ deployer = owner
+    }
+
     function setCrowdfundingContract(address _addr) public {
+        require(msg.sender == owner, "Not owner"); // ✅ only owner can set
         require(crowdfundingContract == address(0), "Already set");
         require(_addr != address(0), "Zero address");
         crowdfundingContract = _addr;
