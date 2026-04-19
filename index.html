@@ -1453,6 +1453,44 @@
                 display: none;
             }
         }
+
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 320px;
+            text-align: center;
+        }
+
+        .modal-content input {
+            width: 100%;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+
+        .modal-content button {
+            margin-top: 10px;
+            padding: 10px;
+            width: 100%;
+            background: #d4880a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
     </style>
 </head>
 
@@ -1490,6 +1528,17 @@
 
     <!-- ═══ HOME PAGE ═══════════════════════════════════════════ -->
     <div class="page active" id="page-home">
+        <div id="registerModal" class="modal">
+            <div class="modal-content">
+                <h2>Complete Your Profile</h2>
+                <p>Please register before using ChainFund</p>
+
+                <input id="regName" placeholder="Your Name">
+                <input id="regEmail" placeholder="Your Email">
+
+                <button onclick="registerUser()">Register</button>
+            </div>
+        </div>
 
         <section class="hero">
             <div class="hero-grid-bg"></div>
@@ -1837,7 +1886,10 @@
             "function refund(uint id)",
             "function campaigns(uint) view returns (address creator, string title, string description, uint goal, uint deadline, uint amountRaised, bool withdrawn)",
             "function getCampaignCount() view returns (uint)",
-            "function contributions(uint, address) view returns (uint)"
+            "function contributions(uint, address) view returns (uint)",
+            "function registerUser(string name, string email)",
+            "function isRegistered(address user) view returns (bool)",
+            "function users(address) view returns (string name, string email, bool registered)"
         ];
 
         /* ── Tab navigation ── */
@@ -1857,13 +1909,32 @@
         async function connectWallet() {
             try {
                 await window.ethereum.request({ method: 'eth_requestAccounts' });
+
                 provider = new ethers.providers.Web3Provider(window.ethereum);
                 signer = provider.getSigner();
+
                 const address = await signer.getAddress();
                 currentUserAddress = address;
+
                 contract = new ethers.Contract(contractAddress, abi, signer);
+
                 setWalletUI(address);
-                loadCampaignCount();
+
+   
+                let isReg = false;
+                try {
+                    isReg = await contract.isRegistered(address);
+                } catch (e) {
+                    console.error("Registration check failed:", e);
+                }
+
+                if (!isReg) {
+                    showRegistrationForm();
+                } else {
+                    hideRegistrationForm();
+                    loadCampaignCount();
+                }
+
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Connection failed: ' + err.message);
             }
@@ -2116,8 +2187,41 @@
             el.textContent = msg;
         }
 
+        function showRegistrationForm() {
+            document.getElementById("registerModal").style.display = "flex";
+        }
+
+        function hideRegistrationForm() {
+            document.getElementById("registerModal").style.display = "none";
+        }
+
+        async function registerUser() {
+            const name = document.getElementById("regName").value;
+            const email = document.getElementById("regEmail").value;
+
+            if (!name || !email) {
+                alert("Fill all fields");
+                return;
+            }
+
+            const tx = await contract.registerUser(name, email);
+            await tx.wait();
+
+            alert("Registered successfully!");
+            hideRegistrationForm();
+        }
+
         /* ── Create Campaign ── */
         async function createCampaign() {
+            const isReg = await contract.isRegistered(currentUserAddress);
+
+            if (isReg) {
+                hideRegistrationForm();
+                loadCampaignCount();
+            } else {
+                showRegistrationForm();
+            }
+            
             if (!contract) { showStatusMsg('createStatus', 'error', 'Connect your wallet first.'); return; }
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('description').value.trim();
