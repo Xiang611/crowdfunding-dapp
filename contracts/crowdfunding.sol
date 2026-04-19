@@ -55,12 +55,12 @@ contract Crowdfunding {
         string memory _title,
         string memory _description,
         uint _goal,
-        uint _durationInDays
+        uint _durationInSeconds
     ) public {
         require(_goal > 0, "Goal must be > 0");
-        require(_durationInDays > 0, "Duration must be > 0");
+        require(_durationInSeconds >= 60, "Duration must be at least 60 seconds");
 
-        uint deadline = block.timestamp + (_durationInDays * 1 days);
+        uint deadline = block.timestamp + _durationInSeconds;
 
         campaigns.push(
             Campaign(
@@ -95,10 +95,9 @@ contract Crowdfunding {
     function withdraw(uint id) public {
         require(id < campaigns.length, "Campaign does not exist");
         Campaign storage c = campaigns[id];
-        require(msg.sender == c.creator,       "Only creator can withdraw");
-        require(block.timestamp >= c.deadline, "Campaign still active");
-        require(c.amountRaised >= c.goal,      "Funding goal not reached");
-        require(!c.withdrawn,                  "Already withdrawn");
+        require(msg.sender == c.creator, "Only creator can withdraw");
+        require(c.amountRaised >= c.goal,  "Funding goal not reached");
+        require(!c.withdrawn,              "Already withdrawn");
 
         c.withdrawn = true;
         uint amount = c.amountRaised;

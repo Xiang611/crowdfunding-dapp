@@ -1797,45 +1797,41 @@
             const val = parseFloat(document.getElementById('duration').value);
             const hint = document.getElementById('durationHint');
             if (!val || val <= 0) { hint.textContent = ''; hint.className = 'duration-hint'; return; }
-            const totalMinutes = durationUnit === 'minutes' ? val
-                : durationUnit === 'hours' ? val * 60
-                    : val * 1440;
-            const totalDays = Math.ceil(totalMinutes / 1440);
 
-            if (durationUnit === 'days') {
-                hint.textContent = val === 1 ? '≈ 1 day' : `≈ ${val} days`;
-                hint.className = 'duration-hint';
+            if (durationUnit === 'minutes') {
+                const h = Math.floor(val / 60), m = val % 60;
+                const parts = [];
+                if (h) parts.push(h + 'h');
+                if (m) parts.push(m + 'min');
+                hint.textContent = parts.join(' ') || val + ' min';
+                hint.className = val < 1 ? 'duration-hint warn' : 'duration-hint';
             } else if (durationUnit === 'hours') {
                 const d = Math.floor(val / 24), h = val % 24;
                 const parts = [];
                 if (d) parts.push(d + 'd');
                 if (h) parts.push(h + 'h');
-                hint.textContent = parts.join(' ') + (totalDays < 1 ? ' — rounds up to 1 day on-chain' : ` → ${totalDays}d on-chain`);
-                hint.className = totalDays < 1 ? 'duration-hint warn' : 'duration-hint';
+                hint.textContent = parts.join(' ') || val + ' hr';
+                hint.className = 'duration-hint';
             } else {
-                const h = Math.floor(val / 60), m = val % 60;
-                const parts = [];
-                if (h) parts.push(h + 'h');
-                if (m) parts.push(m + 'min');
-                hint.textContent = parts.join(' ') + (totalDays < 1 ? ' — rounds up to 1 day on-chain' : ` → ${totalDays}d on-chain`);
-                hint.className = totalDays < 1 ? 'duration-hint warn' : 'duration-hint';
+                hint.textContent = val === 1 ? '≈ 1 day' : `≈ ${val} days`;
+                hint.className = 'duration-hint';
             }
         }
 
         /** Convert the user's duration input to whole days for the smart contract */
-        function getDurationInDays() {
+        function getDurationInSeconds() {
             const val = parseFloat(document.getElementById('duration').value);
             if (!val || val <= 0) return null;
-            const totalMinutes = durationUnit === 'minutes' ? val
-                : durationUnit === 'hours' ? val * 60
-                    : val * 1440;
-            return Math.max(1, Math.ceil(totalMinutes / 1440));
+            const seconds = durationUnit === 'minutes' ? val * 60
+                : durationUnit === 'hours'   ? val * 3600
+                : val * 86400;
+            return Math.max(60, Math.floor(seconds));
         }
 
-        const contractAddress = "0x2b7d13a9E579baFaf1592A16d192b3e0ba5865De";
+        const contractAddress = "0x4e98c702b571Bda19a2a5A525d412C0b8aaa1688";
 
         const abi = [
-            "function createCampaign(string title, string description, uint goal, uint durationInDays)",
+            "function createCampaign(string title, string description, uint goal, uint durationInSeconds)",
             "function contribute(uint id) payable",
             "function withdraw(uint id)",
             "function refund(uint id)",
@@ -2098,6 +2094,9 @@
                 setInlineStatus(statEl, 'loading', 'Confirming transaction…');
                 await tx.wait();
                 setInlineStatus(statEl, 'success', '✓ Refund sent to your wallet!');
+                btn.style.display = 'none';
+                const footerBtn = document.getElementById('refund-footer-' + id);
+                if (footerBtn) footerBtn.style.display = 'none';
                 await loadAllCampaigns();
             } catch (err) {
                 setInlineStatus(statEl, 'error', err.reason || err.message);
@@ -2123,19 +2122,18 @@
             const title = document.getElementById('title').value.trim();
             const description = document.getElementById('description').value.trim();
             const goal = document.getElementById('goal').value;
-            const durationDays = getDurationInDays();
-
-            if (!title || !description || !goal || !durationDays) {
-                showStatusMsg('createStatus', 'error', 'Please fill in all fields.');
-                return;
-            }
+            const durationSeconds = getDurationInSeconds();
+            
+            if (!title || !description || !goal || !durationSeconds) {
+                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), durationSeconds)
+            };
 
             const btn = document.getElementById('createBtn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner" style="border-top-color:#fff;border-color:rgba(255,255,255,0.3);"></span>Deploying…';
             showStatusMsg('createStatus', 'loading', 'Waiting for MetaMask confirmation…');
             try {
-                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), durationDays);
+                const tx = await contract.createCampaign(title, description, ethers.utils.parseEther(goal), durationSeconds);
                 showStatusMsg('createStatus', 'loading', 'Transaction sent — awaiting confirmation…');
                 const receipt = await tx.wait();
                 showStatusMsg('createStatus', 'success', '✓ Campaign deployed! Tx: ' + receipt.transactionHash.slice(0, 22) + '…');
