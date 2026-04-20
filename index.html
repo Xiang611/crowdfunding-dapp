@@ -2181,8 +2181,8 @@
             return Math.max(60, Math.floor(seconds));
         }
 
-        const contractAddress = "0x0e5161c54A63c79C50875a02C5AC51b54dAc0566";
-        const tokenAddress = "0x234F38510368792E3132e4846Af5311Ff1057807"; // ← paste Token.sol address
+        const contractAddress = "0xFEa072857228fa3c582FF2eE4F8820c9d3711049";
+        const tokenAddress = "0x001808CF18CF1E130882D5c27acd8282b87891eC"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -2202,7 +2202,7 @@
             "function users(address) view returns (string name, string email, bool registered)"
         ];
 
-        const stakingAddress = "0xe72B8A44852779bB94F8Ec0eCd088Ed615e44304"; // ← paste here
+        const stakingAddress = "0x3BB9778193dB021C43B8FFcc88ae9f5730a93edf"; // ← paste here
         const stakingAbi = [
             "function stake(uint amount)",
             "function unstake()",
@@ -2322,8 +2322,10 @@
 
                 const contribPromises = all.map((_, i) => contract.contributions(i, currentUserAddress));
                 const contribs = await Promise.all(contribPromises);
+                const ctkRaw = await tokenContract.balanceOf(currentUserAddress);
+                const ctkBal = parseFloat(ethers.utils.formatUnits(ctkRaw, 18));
 
-                const html = all.map((c, i) => buildCard(i, c, contribs[i])).join('');
+                const html = all.map((c, i) => buildCard(i, c, contribs[i], ctkBal)).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
@@ -2342,7 +2344,7 @@
             } catch (e) { }
         }
 
-        function buildCard(id, c, myContrib) {
+        function buildCard(id, c, myContrib, ctkBal) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
             const myEth = parseFloat(ethers.utils.formatEther(myContrib || 0));
@@ -2351,6 +2353,7 @@
             const isActive = now < c.deadline.toNumber();
             const reached = raised >= goal;
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+            const remaining = Math.max(0, goal - raised);
 
             let badge;
             if (c.withdrawn) badge = '<span class="badge badge-success">⬡ Withdrawn</span>';
@@ -2364,26 +2367,36 @@
             const canWithdraw = isCreator && reached && !c.withdrawn;
             const canRefund = myEth > 0 && !isActive && !reached;
 
+
+            const hasCTK = (ctkBal || 0) >= 10;
+
             const withdrawPanel = canWithdraw ? `
-            <div class="cmp-withdraw-panel" id="wpanel-${id}">
-                <div class="panel-label panel-label-gold">Withdraw Funds</div>
-                <div class="panel-desc">Your campaign reached its goal. Withdraw <b>${raised.toFixed(4)} ETH</b> to your wallet.</div>
-                
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;background:var(--gold-dim);border:1px solid var(--gold-glow);border-radius:var(--radius-sm);">
-                    <input type="checkbox" id="useCTK-${id}" onchange="updateFeeInfo(${id}, ${raised})" style="width:16px;height:16px;accent-color:var(--gold);cursor:pointer;">
-                    <label for="useCTK-${id}" style="font-size:12px;color:var(--text2);cursor:pointer;">
-                        Use <strong style="color:var(--gold);">CTK token</strong> for 1% fee discount 
-                        <span style="color:var(--text3);">(instead of 3%)</span>
-                    </label>
-                </div>
+                <div class="cmp-withdraw-panel" id="wpanel-${id}">
+                    <div class="panel-label panel-label-gold">Withdraw Funds</div>
+                    <div class="panel-desc">Your campaign reached its goal. Withdraw <b>${raised.toFixed(4)} ETH</b> to your wallet.</div>
 
-                <div id="feeInfo-${id}" style="font-size:11px;color:var(--text3);margin-bottom:10px;">
-                    Fee: <strong>3%</strong> → You receive <strong>${(raised * 0.97).toFixed(4)} ETH</strong>
-                </div>
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:10px 12px;
+                        background:${hasCTK ? 'var(--gold-dim)' : 'var(--bg3)'};
+                        border:1px solid ${hasCTK ? 'var(--gold-glow)' : 'var(--border)'};
+                        border-radius:var(--radius-sm);opacity:${hasCTK ? '1' : '0.6'};">
+                        <input type="checkbox" id="useCTK-${id}"
+                            onchange="updateFeeInfo(${id}, ${raised})"
+                            style="width:16px;height:16px;accent-color:var(--gold);cursor:${hasCTK ? 'pointer' : 'not-allowed'};"
+                            ${hasCTK ? '' : 'disabled'}>
+                        <label for="useCTK-${id}" style="font-size:12px;color:var(--text2);cursor:${hasCTK ? 'pointer' : 'not-allowed'};">
+                            Use <strong style="color:var(--gold);">CTK token</strong> for 1% fee discount
+                            <span style="color:var(--text3);">(instead of 3%)</span>
+                            ${!hasCTK ? '<br><span style="color:var(--red);font-size:11px;">✗ Need at least 10 CTK for this discount</span>' : ''}
+                        </label>
+                    </div>
 
-                <button class="btn-action-full btn-do-withdraw" id="wbtn-${id}" onclick="doWithdraw(${id}, ${raised})">Withdraw ETH</button>
-                <div class="inline-status" id="wstatus-${id}"></div>
-            </div>` : '';
+                    <div id="feeInfo-${id}" style="font-size:11px;color:var(--text3);margin-bottom:10px;">
+                        Fee: <strong>3%</strong> → You receive <strong>${(raised * 0.97).toFixed(4)} ETH</strong>
+                    </div>
+
+                    <button class="btn-action-full btn-do-withdraw" id="wbtn-${id}" onclick="doWithdraw(${id}, ${raised})">Withdraw ETH</button>
+                    <div class="inline-status" id="wstatus-${id}"></div>
+                </div>` : '';
 
             const refundPanel = canRefund ? `
             <div class="cmp-refund-panel" id="rpanel-${id}">
@@ -2420,7 +2433,10 @@
       <div class="field">
         <label>Amount to contribute</label>
         <div class="input-wrap">
-          <input type="number" id="amt-${id}" placeholder="0.05">
+          <input type="number" id="amt-${id}" placeholder="0.05" max="${remaining.toFixed(6)}" step="0.0001">
+          <div style="font-size:11px;color:var(--text3);margin-top:5px;">
+            Max contribution: <strong>${remaining.toFixed(4)} ETH</strong>
+          </div>
           <span class="input-sfx">ETH</span>
         </div>
       </div>
@@ -2468,6 +2484,16 @@
             const btn = document.getElementById('cbtn-' + id);
             const statEl = document.getElementById('cstatus-' + id);
             if (!amount || parseFloat(amount) <= 0) { setInlineStatus(statEl, 'error', 'Enter a valid amount.'); return; }
+            const campaign = await contract.campaigns(id);
+            const raised = parseFloat(ethers.utils.formatEther(campaign.amountRaised));
+            const goal = parseFloat(ethers.utils.formatEther(campaign.goal));
+            const remaining = goal - raised;
+
+            if (parseFloat(amount) > remaining) {
+                setInlineStatus(statEl, 'error',
+                    `Amount exceeds remaining goal. Max: ${remaining.toFixed(4)} ETH`);
+                return;
+            }
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>Sending...';
             setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
