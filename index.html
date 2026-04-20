@@ -1555,111 +1555,721 @@
             </div>
         </div>
 
-        <section class="hero">
-            <div class="hero-grid-bg"></div>
-            <div class="hero-glow"></div>
-            <div class="hero-badge">⬡ Built on Ethereum · Fully On-Chain</div>
-            <h1>Fund ideas that<br>matter — <span>on-chain</span></h1>
-            <p>ChainFund is a decentralised crowdfunding platform where every transaction is transparent,
-                permissionless, and secured by the Ethereum blockchain.</p>
-            <div class="hero-actions">
-                <button class="btn-hero btn-hero-primary" onclick="showTab('campaigns')">Browse Campaigns →</button>
-                <button class="btn-hero btn-hero-sec" onclick="showTab('create')">Start a Campaign</button>
+
+        <!-- ── HERO ── -->
+        <section
+            style="position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:7rem 2rem 5rem;overflow:hidden;">
+            <!-- Orbs -->
+            <div
+                style="position:absolute;width:560px;height:560px;border-radius:50%;background:radial-gradient(circle,rgba(212,136,10,0.11),transparent 68%);top:-160px;left:50%;transform:translateX(-50%);filter:blur(70px);animation:pulse-dot 7s ease-in-out infinite;pointer-events:none;">
             </div>
-            <div class="stats-bar">
-                <div class="stat-item">
-                    <div class="stat-num" id="statCampaigns">—</div>
-                    <div class="stat-label">Total Campaigns</div>
+            <div
+                style="position:absolute;width:320px;height:320px;border-radius:50%;background:radial-gradient(circle,rgba(0,149,124,0.07),transparent 70%);bottom:5%;right:5%;filter:blur(60px);animation:pulse-dot 7s 2.5s ease-in-out infinite;pointer-events:none;">
+            </div>
+            <!-- Grid -->
+            <div
+                style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.045) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent 75%);pointer-events:none;">
+            </div>
+
+            <!-- Eyebrow pill -->
+            <div
+                style="display:inline-flex;align-items:center;gap:10px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:5px 18px 5px 6px;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2.25rem;box-shadow:0 2px 16px rgba(0,0,0,0.07);position:relative;z-index:2;">
+                <div
+                    style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--gold),#f0a820);color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:600;">
+                    <span
+                        style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse-dot 1.8s ease-in-out infinite;display:inline-block;"></span>
+                    Live on Ethereum
                 </div>
-                <div class="stat-item">
-                    <div class="stat-num">100%</div>
-                    <div class="stat-label">On-Chain Verified</div>
+                Fully on-chain · Permissionless · 3% Fees Only
+            </div>
+
+            <!-- Headline -->
+            <h1
+                style="font-family:var(--ff-head);font-size:clamp(3.2rem,8vw,6.5rem);font-weight:800;line-height:1.00;letter-spacing:-0.035em;color:var(--text);position:relative;z-index:2;margin-bottom:1.75rem;max-width:900px;">
+                Fund ideas that<br>matter —
+                <span
+                    style="background:linear-gradient(135deg,#b8760a 0%,var(--gold) 35%,#f0a820 60%,var(--gold) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:pulse-dot 5s linear infinite;">
+                    on&#8209;chain</span>
+            </h1>
+
+            <p
+                style="font-size:1.15rem;color:var(--text2);max-width:580px;line-height:1.75;font-weight:300;position:relative;z-index:2;margin-bottom:3rem;">
+                ChainFund is a decentralised crowdfunding platform where every transaction is transparent,
+                permissionless, and secured by Ethereum. No middlemen. No hidden fees. Just pure, trustless funding.
+            </p>
+
+            <!-- CTAs -->
+            <div
+                style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;z-index:2;margin-bottom:5rem;">
+                <button onclick="showTab('campaigns')"
+                    style="padding:14px 36px;background:var(--gold);color:#fff;border:none;border-radius:12px;font-family:var(--ff-body);font-size:15px;font-weight:600;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 20px rgba(212,136,10,0.25);"
+                    onmouseover="this.style.background='#b8760a';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.background='var(--gold)';this.style.transform='none'">Browse Campaigns
+                    →</button>
+                <button onclick="showTab('create')"
+                    style="padding:14px 36px;background:var(--bg2);color:var(--text);border:1px solid var(--border2);border-radius:12px;font-family:var(--ff-body);font-size:15px;font-weight:500;cursor:pointer;transition:all 0.22s;box-shadow:0 2px 8px rgba(0,0,0,0.05);"
+                    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)';this.style.transform='translateY(-2px)'"
+                    onmouseout="this.style.borderColor='var(--border2)';this.style.color='var(--text)';this.style.transform='none'">Start
+                    a Campaign</button>
+            </div>
+
+            <!-- Stats card -->
+            <div
+                style="display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg2);border:1px solid var(--border2);border-radius:20px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.08);position:relative;z-index:2;max-width:680px;width:100%;">
+                <div style="padding:1.75rem 2rem;text-align:center;">
+                    <div style="font-family:var(--ff-head);font-size:2.25rem;font-weight:800;color:var(--gold);letter-spacing:-0.025em;margin-bottom:5px;"
+                        id="statCampaigns">—</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
+                        Total Campaigns</div>
+                    <div style="font-size:11px;color:var(--teal);margin-top:4px;font-weight:500;">↑ On-Chain</div>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-num">0%</div>
-                    <div class="stat-label">Platform Fees</div>
+                <div style="padding:1.75rem 2rem;text-align:center;border-left:1px solid var(--border2);">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2.25rem;font-weight:800;color:var(--gold);letter-spacing:-0.025em;margin-bottom:5px;">
+                        100%</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
+                        Verified</div>
+                    <div style="font-size:11px;color:var(--teal);margin-top:4px;font-weight:500;">↑ Etherscan</div>
+                </div>
+                <div style="padding:1.75rem 2rem;text-align:center;border-left:1px solid var(--border2);">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2.25rem;font-weight:800;color:var(--gold);letter-spacing:-0.025em;margin-bottom:5px;">
+                        3%</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
+                        Platform Fees</div>
+                    <div style="font-size:11px;color:var(--teal);margin-top:4px;font-weight:500;">Cheapest in market
+                    </div>
                 </div>
             </div>
         </section>
 
-        <section class="section">
-            <div class="section-label">Why ChainFund</div>
-            <div class="section-title">Crowdfunding reimagined<br>for Web3</div>
-            <div class="section-sub">No middlemen. No hidden fees. Your contributions go directly on-chain and funds are
-                released transparently when goals are met.</div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon fi-gold">🔒</div>
-                    <h3>Non-Custodial</h3>
-                    <p>Your funds are held in a smart contract — not by us. Nobody can move money without on-chain rules
-                        being satisfied.</p>
+        <!-- ── TICKER ── -->
+        <div
+            style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--bg2);overflow:hidden;padding:12px 0;position:relative;">
+            <div
+                style="position:absolute;top:0;bottom:0;left:0;width:80px;background:linear-gradient(90deg,var(--bg2),transparent);z-index:2;">
+            </div>
+            <div
+                style="position:absolute;top:0;bottom:0;right:0;width:80px;background:linear-gradient(-90deg,var(--bg2),transparent);z-index:2;">
+            </div>
+            <div style="display:flex;animation:ticker 28s linear infinite;width:max-content;">
+                <style>
+                    @keyframes ticker {
+                        0% {
+                            transform: translateX(0)
+                        }
+
+                        100% {
+                            transform: translateX(-50%)
+                        }
+                    }
+                </style>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">ETH</span>
+                    Secured by Ethereum mainnet
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon fi-teal">🌐</div>
-                    <h3>Fully Transparent</h3>
-                    <p>Every contribution and withdrawal is a public transaction on Ethereum. Anyone can audit the
-                        funding trail at any time.</p>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">0%</span>
+                    Zero platform fees on contributions
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon fi-purple">⚡</div>
-                    <h3>Instant Settlement</h3>
-                    <p>No bank delays. Funds are available to campaign creators the moment their goal is reached and
-                        deadline passes.</p>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">CTK</span>
+                    Stake tokens for fee discounts
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon fi-gold">🌍</div>
-                    <h3>Permissionless</h3>
-                    <p>Anyone with an Ethereum wallet can create a campaign or contribute — no sign-ups, no KYC, no
-                        geographic restrictions.</p>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🔒</span>
+                    Non-custodial smart contracts
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon fi-teal">📋</div>
-                    <h3>Smart Contract Governed</h3>
-                    <p>Campaign rules, deadlines, and goals are locked in code. No admin can change them after a
-                        campaign is launched.</p>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">⚡</span>
+                    Instant settlement on goal completion
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon fi-purple">🔗</div>
-                    <h3>Composable</h3>
-                    <p>Our open contract is readable on Etherscan. Developers can build integrations and extensions
-                        freely on top.</p>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🌍</span>
+                    Accessible to anyone with a wallet
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">✓</span>
+                    Verified on Etherscan
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🔗</span>
+                    Open-source smart contracts
+                </div>
+                <!-- duplicate for loop -->
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">ETH</span>
+                    Secured by Ethereum mainnet
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">0%</span>
+                    Zero platform fees on contributions
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">CTK</span>
+                    Stake tokens for fee discounts
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🔒</span>
+                    Non-custodial smart contracts
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">⚡</span>
+                    Instant settlement on goal completion
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🌍</span>
+                    Accessible to anyone with a wallet
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;border-right:1px solid var(--border);">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">✓</span>
+                    Verified on Etherscan
+                </div>
+                <div
+                    style="display:flex;align-items:center;gap:10px;padding:0 2.5rem;font-size:12px;font-weight:500;color:var(--text2);white-space:nowrap;">
+                    <span
+                        style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:100px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">🔗</span>
+                    Open-source smart contracts
                 </div>
             </div>
-        </section>
-
-        <div class="cta-strip">
-            <h2>Ready to fund your next idea?</h2>
-            <p>Connect your wallet and launch a campaign in under 60 seconds.</p>
-            <button class="btn-hero btn-hero-primary" onclick="showTab('create')">Launch a Campaign →</button>
         </div>
+
+        <!-- ── BENTO FEATURES ── -->
+        <section style="max-width:1040px;margin:0 auto;padding:5rem 2rem;">
+            <div
+                style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                <span style="width:24px;height:2px;background:var(--gold);border-radius:2px;display:block;"></span>Why
+                ChainFund
+            </div>
+            <h2
+                style="font-family:var(--ff-head);font-size:clamp(2.2rem,4.5vw,3.4rem);font-weight:800;letter-spacing:-0.028em;line-height:1.05;color:var(--text);margin-bottom:1rem;">
+                Crowdfunding reimagined<br>for Web3</h2>
+            <p
+                style="color:var(--text2);font-size:1rem;line-height:1.75;font-weight:300;max-width:520px;margin-bottom:3.5rem;">
+                No middlemen. No hidden fees. Your contributions go directly on-chain and funds release transparently
+                when goals are met.</p>
+
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+
+                <!-- Highlight wide -->
+                <div style="grid-column:span 2;background:linear-gradient(135deg,#1a1208,#261a08);border:1px solid rgba(212,136,10,0.25);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        🔒</div>
+                    <h3 style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:#fff;margin-bottom:8px;">
+                        Non-Custodial by Design</h3>
+                    <p style="font-size:13px;color:rgba(255,255,255,0.55);line-height:1.7;font-weight:300;">Your funds
+                        are held in a smart contract — not by us. Nobody can move money without on-chain rules being
+                        satisfied. Not even us.</p>
+                    <div style="display:flex;align-items:flex-end;gap:4px;height:48px;margin-top:1.25rem;">
+                        <div
+                            style="flex:1;height:30%;border-radius:4px 4px 0 0;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        </div>
+                        <div
+                            style="flex:1;height:55%;border-radius:4px 4px 0 0;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        </div>
+                        <div
+                            style="flex:1;height:40%;border-radius:4px 4px 0 0;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        </div>
+                        <div
+                            style="flex:1;height:75%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                        </div>
+                        <div
+                            style="flex:1;height:90%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                        </div>
+                        <div
+                            style="flex:1;height:100%;border-radius:4px 4px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                        </div>
+                        <div
+                            style="flex:1;height:65%;border-radius:4px 4px 0 0;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        </div>
+                        <div
+                            style="flex:1;height:45%;border-radius:4px 4px 0 0;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);">
+                        </div>
+                    </div>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:rgba(212,136,10,0.15);color:var(--gold);border:1px solid rgba(212,136,10,0.3);">
+                        ↗ Fully Secured</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.06);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        01</div>
+                </div>
+
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 36px rgba(0,0,0,0.07)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);">
+                        🌐</div>
+                    <h3
+                        style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                        Fully Transparent</h3>
+                    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Every contribution and
+                        withdrawal is a public transaction on Ethereum. Audit the funding trail at any time, forever.
+                    </p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,149,124,0.18);">
+                        Etherscan Verified</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.055);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        02</div>
+                </div>
+
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 36px rgba(0,0,0,0.07)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:rgba(130,100,255,0.08);border:1px solid rgba(130,100,255,0.18);">
+                        ⚡</div>
+                    <h3
+                        style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                        Instant Settlement</h3>
+                    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">No bank delays. Funds
+                        available the moment the campaign goal is reached and deadline passes — automatically.</p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">
+                        No Delays</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.055);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        03</div>
+                </div>
+
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 36px rgba(0,0,0,0.07)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:var(--gold-dim);border:1px solid var(--gold-glow);">
+                        🌍</div>
+                    <h3
+                        style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                        Permissionless</h3>
+                    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Anyone with an
+                        Ethereum wallet can create a campaign or contribute — no KYC, no sign-ups, no geographic
+                        restrictions.</p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,149,124,0.18);">
+                        Global Access</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.055);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        04</div>
+                </div>
+
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 36px rgba(0,0,0,0.07)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);">
+                        📋</div>
+                    <h3
+                        style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                        Smart Contract Governed</h3>
+                    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Campaign rules,
+                        deadlines, and goals are locked in code. No admin can change them once launched. Immutable by
+                        default.</p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">
+                        Immutable Rules</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.055);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        05</div>
+                </div>
+
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;position:relative;overflow:hidden;transition:all 0.28s;"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 36px rgba(0,0,0,0.07)'"
+                    onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                    <div
+                        style="width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:1.25rem;background:rgba(130,100,255,0.08);border:1px solid rgba(130,100,255,0.18);">
+                        🔗</div>
+                    <h3
+                        style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                        Composable</h3>
+                    <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Our open contract is
+                        readable on Etherscan. Developers can build integrations and extensions freely on top of
+                        ChainFund.</p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:100px;margin-top:1rem;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,149,124,0.18);">
+                        Open Source</div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:5rem;font-weight:800;color:rgba(212,136,10,0.055);position:absolute;bottom:-1rem;right:1rem;line-height:1;letter-spacing:-0.05em;user-select:none;">
+                        06</div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ── HOW IT WORKS ── -->
+        <section
+            style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 2rem;">
+            <div style="max-width:1040px;margin:0 auto;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                    <span
+                        style="width:24px;height:2px;background:var(--gold);border-radius:2px;display:block;"></span>How
+                    It Works
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2.2rem,4.5vw,3.4rem);font-weight:800;letter-spacing:-0.028em;color:var(--text);margin-bottom:1rem;">
+                    Launch in four steps</h2>
+                <p
+                    style="color:var(--text2);font-size:1rem;line-height:1.75;font-weight:300;max-width:520px;margin-bottom:3.5rem;">
+                    From wallet connection to funded campaign in minutes. No paperwork. No waiting. Just Ethereum.</p>
+
+                <div
+                    style="display:grid;grid-template-columns:repeat(4,1fr);gap:0;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+                    <div style="background:var(--bg2);padding:2rem 1.75rem;transition:background 0.25s;position:relative;"
+                        onmouseover="this.style.background='var(--bg3)'"
+                        onmouseout="this.style.background='var(--bg2)'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:rgba(212,136,10,0.1);line-height:1;margin-bottom:1rem;letter-spacing:-0.04em;">
+                            01</div>
+                        <div
+                            style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1rem;background:var(--gold-dim);border:1px solid var(--gold-glow);">
+                            🦊</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Connect Wallet</h3>
+                        <p style="font-size:12px;color:var(--text2);line-height:1.7;font-weight:300;">Connect MetaMask
+                            or any Web3 wallet. Register once with your name and email — stored on-chain.</p>
+                    </div>
+                    <div style="background:var(--bg2);padding:2rem 1.75rem;transition:background 0.25s;border-left:1px solid var(--border);"
+                        onmouseover="this.style.background='var(--bg3)'"
+                        onmouseout="this.style.background='var(--bg2)'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:rgba(212,136,10,0.1);line-height:1;margin-bottom:1rem;letter-spacing:-0.04em;">
+                            02</div>
+                        <div
+                            style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);">
+                            📝</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Create Campaign</h3>
+                        <p style="font-size:12px;color:var(--text2);line-height:1.7;font-weight:300;">Set your title,
+                            goal in ETH, and duration. Deploy to Ethereum with one click — immutable from that point on.
+                        </p>
+                    </div>
+                    <div style="background:var(--bg2);padding:2rem 1.75rem;transition:background 0.25s;border-left:1px solid var(--border);"
+                        onmouseover="this.style.background='var(--bg3)'"
+                        onmouseout="this.style.background='var(--bg2)'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:rgba(212,136,10,0.1);line-height:1;margin-bottom:1rem;letter-spacing:-0.04em;">
+                            03</div>
+                        <div
+                            style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1rem;background:var(--gold-dim);border:1px solid var(--gold-glow);">
+                            💸</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Receive Contributions</h3>
+                        <p style="font-size:12px;color:var(--text2);line-height:1.7;font-weight:300;">Backers contribute
+                            ETH directly to your smart contract. Every wei tracked transparently on-chain.</p>
+                    </div>
+                    <div style="background:var(--bg2);padding:2rem 1.75rem;transition:background 0.25s;border-left:1px solid var(--border);"
+                        onmouseover="this.style.background='var(--bg3)'"
+                        onmouseout="this.style.background='var(--bg2)'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:rgba(212,136,10,0.1);line-height:1;margin-bottom:1rem;letter-spacing:-0.04em;">
+                            04</div>
+                        <div
+                            style="width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:1rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);">
+                            🎉</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Withdraw or Refund</h3>
+                        <p style="font-size:12px;color:var(--text2);line-height:1.7;font-weight:300;">Hit your goal?
+                            Withdraw funds. Campaign failed? Backers are automatically eligible for full refunds.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── TRUST ── -->
+        <section style="padding:5rem 2rem;">
+            <div style="max-width:1040px;margin:0 auto;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                    <span
+                        style="width:24px;height:2px;background:var(--gold);border-radius:2px;display:block;"></span>By
+                    the Numbers
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2.2rem,4.5vw,3.4rem);font-weight:800;letter-spacing:-0.028em;color:var(--text);margin-bottom:1rem;">
+                    Built on trust,<br>secured by math</h2>
+                <p
+                    style="color:var(--text2);font-size:1rem;line-height:1.75;font-weight:300;max-width:520px;margin-bottom:3.5rem;">
+                    Every metric that matters is verifiable on-chain. No marketing fluff — just transparent numbers.</p>
+
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;">
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;transition:all 0.28s;position:relative;overflow:hidden;"
+                        onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.06)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:var(--gold);letter-spacing:-0.03em;margin-bottom:6px;line-height:1;">
+                            3%</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Platform Fees on Contributions</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Every wei
+                            contributed goes directly to the campaign. We earn nothing on contributions — only optional
+                            CTK token mechanics sustain the platform.</p>
+                        <div
+                            style="height:3px;background:var(--bg3);border-radius:4px;margin-top:1.25rem;overflow:hidden;">
+                            <div
+                                style="height:100%;width:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--gold));">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;transition:all 0.28s;position:relative;overflow:hidden;"
+                        onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.06)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:var(--gold);letter-spacing:-0.03em;margin-bottom:6px;line-height:1;">
+                            100%</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            On-Chain Transparency</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Every transaction,
+                            contribution, withdrawal, and refund is permanently recorded on Ethereum and publicly
+                            auditable via Etherscan.</p>
+                        <div
+                            style="height:3px;background:var(--bg3);border-radius:4px;margin-top:1.25rem;overflow:hidden;">
+                            <div
+                                style="height:100%;width:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--gold));">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:18px;padding:2rem;transition:all 0.28s;position:relative;overflow:hidden;"
+                        onmouseover="this.style.borderColor='var(--border2)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(0,0,0,0.06)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="font-family:var(--ff-head);font-size:3rem;font-weight:800;color:var(--gold);letter-spacing:-0.03em;margin-bottom:6px;line-height:1;">
+                            ∞</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:8px;">
+                            Borderless by Default</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">No geographic
+                            restrictions. No bank accounts required. No KYC. If you have an Ethereum wallet, you have
+                            full access — everywhere.</p>
+                        <div
+                            style="height:3px;background:var(--bg3);border-radius:4px;margin-top:1.25rem;overflow:hidden;">
+                            <div
+                                style="height:100%;width:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--gold));">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── CTA FINALE ── -->
+        <section style="padding:3rem 2rem 5rem;">
+            <div
+                style="max-width:860px;margin:0 auto;background:linear-gradient(135deg,#1a1208,#1e1508);border:1px solid rgba(212,136,10,0.2);border-radius:28px;padding:5rem 3rem;text-align:center;position:relative;overflow:hidden;">
+                <div
+                    style="position:absolute;top:-100px;left:50%;transform:translateX(-50%);width:400px;height:300px;background:radial-gradient(ellipse,rgba(212,136,10,0.14),transparent 70%);filter:blur(60px);pointer-events:none;">
+                </div>
+                <div
+                    style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.04) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse 80% 70% at 50% 0%,black,transparent);pointer-events:none;">
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2.2rem,5vw,3.8rem);font-weight:800;letter-spacing:-0.03em;line-height:1.05;color:#fff;margin-bottom:1.25rem;position:relative;">
+                    Ready to fund your<br><span
+                        style="background:linear-gradient(135deg,var(--gold),#f0a820);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">next
+                        big idea?</span></h2>
+                <p
+                    style="font-size:1.05rem;color:rgba(255,255,255,0.5);margin-bottom:2.75rem;font-weight:300;line-height:1.7;position:relative;">
+                    Connect your wallet and launch a campaign in under 60 seconds.<br>No paperwork, no waiting, no
+                    middlemen.</p>
+                <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative;">
+                    <button onclick="showTab('create')"
+                        style="padding:14px 36px;background:var(--gold);color:#fff;border:none;border-radius:12px;font-family:var(--ff-body);font-size:15px;font-weight:600;cursor:pointer;transition:all 0.22s;box-shadow:0 4px 24px rgba(212,136,10,0.3);"
+                        onmouseover="this.style.background='#b8760a';this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='var(--gold)';this.style.transform='none'">Launch a Campaign
+                        →</button>
+                    <button onclick="showTab('campaigns')"
+                        style="padding:14px 36px;background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.8);border:1px solid rgba(255,255,255,0.14);border-radius:12px;font-family:var(--ff-body);font-size:15px;font-weight:500;cursor:pointer;transition:all 0.22s;"
+                        onmouseover="this.style.background='rgba(255,255,255,0.12)';this.style.transform='translateY(-2px)'"
+                        onmouseout="this.style.background='rgba(255,255,255,0.07)';this.style.transform='none'">Browse
+                        Campaigns</button>
+                </div>
+                <div
+                    style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:2.5rem;flex-wrap:wrap;position:relative;">
+                    <div style="display:flex;">
+                        <div
+                            style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f0a820);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.2);">
+                            HY</div>
+                        <div
+                            style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#00c4a0);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.2);margin-left:-8px;">
+                            KT</div>
+                        <div
+                            style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#8264ff,#a48fff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;border:2px solid rgba(255,255,255,0.2);margin-left:-8px;">
+                            Leon</div>
+                        <div
+                            style="width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,#4f9aff,#7bbdff);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;border:2px solid rgba(255,255,255,0.2);margin-left:-8px;">
+                            KX</div>
+                    </div>
+                    <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);"></div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:300;">Built by a <strong
+                            style="color:rgba(255,255,255,0.8);font-weight:500;">dedicated team</strong> of Web3
+                        engineers</div>
+                    <div style="width:1px;height:16px;background:rgba(255,255,255,0.15);"></div>
+                    <div style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:300;">Verified on <strong
+                            style="color:rgba(255,255,255,0.8);font-weight:500;">Etherscan</strong></div>
+                </div>
+            </div>
+        </section>
 
     </div>
 
     <!-- ═══ CAMPAIGNS PAGE ══════════════════════════════════════ -->
     <div class="page" id="page-campaigns">
-        <div class="campaigns-page">
-            <div class="page-header">
+
+        <!-- ── HERO ── -->
+        <section style="position:relative;padding:4.5rem 2rem 3rem;overflow:hidden;">
+            <div
+                style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.04) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent 70%);pointer-events:none;">
+            </div>
+            <div
+                style="position:absolute;width:480px;height:380px;border-radius:50%;background:radial-gradient(ellipse,rgba(212,136,10,0.1),transparent 68%);top:-120px;left:50%;transform:translateX(-50%);filter:blur(70px);animation:pulse-dot 7s ease-in-out infinite;pointer-events:none;">
+            </div>
+            <div
+                style="position:absolute;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,rgba(0,149,124,0.07),transparent 70%);top:0;right:5%;filter:blur(60px);animation:pulse-dot 7s 3s ease-in-out infinite;pointer-events:none;">
+            </div>
+
+            <div
+                style="max-width:1040px;margin:0 auto;display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:center;position:relative;z-index:2;">
                 <div>
-                    <h2>Live Campaigns</h2>
-                    <p>Browse all campaigns and contribute ETH directly on-chain</p>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.16em;text-transform:uppercase;color:var(--gold);margin-bottom:.75rem;">
+                        <span
+                            style="width:20px;height:2px;background:var(--gold);border-radius:2px;display:block;"></span>Live
+                        Campaigns
+                    </div>
+                    <h1
+                        style="font-family:var(--ff-head);font-size:clamp(2.2rem,4vw,3.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1.05;color:var(--text);margin-bottom:.75rem;">
+                        Browse &amp; fund<br>
+                        <span
+                            style="background:linear-gradient(135deg,#b8760a,var(--gold),#f0a820,var(--gold));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">on-chain</span>
+                        ideas
+                    </h1>
+                    <p style="font-size:.95rem;color:var(--text2);line-height:1.7;font-weight:300;max-width:480px;">
+                        Every campaign is a live smart contract. Contribute ETH directly, track progress in real time,
+                        and get automatic refunds if goals aren't met.</p>
+                </div>
+                <!-- Live counter -->
+                <div
+                    style="background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:1.25rem 1.75rem;text-align:center;box-shadow:0 4px 20px rgba(0,0,0,0.07);min-width:160px;">
+                    <div style="font-family:var(--ff-head);font-size:2.5rem;font-weight:800;color:var(--gold);letter-spacing:-0.03em;line-height:1;"
+                        id="statCampaigns">—</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-weight:500;margin-top:4px;">
+                        Total Campaigns</div>
+                    <div
+                        style="display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;color:var(--teal);margin-top:5px;font-weight:500;">
+                        <span
+                            style="width:6px;height:6px;border-radius:50%;background:var(--teal);animation:pulse-dot 1.8s ease-in-out infinite;display:inline-block;"></span>On-chain
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <div class="load-bar">
-                <span class="load-bar-text" id="campaignCountLabel">Connect your wallet and load campaigns to get
-                    started.</span>
-                <button class="btn-load" id="loadBtn" onclick="loadAllCampaigns()">Load Campaigns</button>
+        <!-- ── LOAD BAR (dark card) ── -->
+        <div style="max-width:1040px;margin:0 auto;padding:0 2rem 1.5rem;">
+            <div
+                style="background:linear-gradient(135deg,#1a1208,#1e1408);border:1px solid rgba(212,136,10,0.2);border-radius:16px;padding:1.25rem 1.75rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;position:relative;overflow:hidden;">
+                <div
+                    style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.04) 1px,transparent 1px);background-size:28px 28px;mask-image:radial-gradient(ellipse 80% 80% at 0% 50%,black,transparent);pointer-events:none;">
+                </div>
+                <span style="font-size:13px;color:rgba(255,255,255,0.5);font-weight:300;position:relative;"
+                    id="campaignCountLabel"><strong style="color:rgba(255,255,255,0.85);font-weight:600;">Connect your
+                        wallet</strong> and load campaigns to get started.</span>
+                <button class="btn-load" id="loadBtn" onclick="loadAllCampaigns()"
+                    style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--teal),#00c4a0);color:#fff;border:none;border-radius:10px;padding:10px 22px;font-size:13px;font-weight:600;font-family:var(--ff-body);cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(0,149,124,0.3);position:relative;"
+                    onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-1px)'"
+                    onmouseout="this.style.filter='none';this.style.transform='none'">⬡ Load Campaigns</button>
             </div>
+        </div>
 
+        <!-- ── FILTER TOOLBAR ── -->
+        <div
+            style="max-width:1040px;margin:0 auto;padding:0 2rem 1.5rem;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;" id="filterBar">
+                <button onclick="filterCampaigns('all',this)"
+                    style="display:inline-flex;align-items:center;gap:5px;background:var(--gold);border:1px solid var(--gold);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:all .2s;font-family:var(--ff-body);">All</button>
+                <button onclick="filterCampaigns('active',this)"
+                    style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;font-family:var(--ff-body);"
+                    onmouseover="this.style.borderColor='var(--teal)';this.style.color='var(--teal)'"
+                    onmouseout="if(!this.classList.contains('fpill-active')){this.style.borderColor='var(--border2)';this.style.color='var(--text2)'}">●
+                    Active</button>
+                <button onclick="filterCampaigns('reached',this)"
+                    style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;font-family:var(--ff-body);"
+                    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                    onmouseout="if(!this.classList.contains('fpill-active')){this.style.borderColor='var(--border2)';this.style.color='var(--text2)'}">✓
+                    Goal Reached</button>
+                <button onclick="filterCampaigns('ended',this)"
+                    style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;font-family:var(--ff-body);"
+                    onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'"
+                    onmouseout="if(!this.classList.contains('fpill-active')){this.style.borderColor='var(--border2)';this.style.color='var(--text2)'}">◌
+                    Ended</button>
+            </div>
+            <span style="font-size:13px;color:var(--text3);font-weight:400;" id="filterCount"></span>
+        </div>
+
+        <!-- ── CAMPAIGNS AREA ── -->
+        <div style="max-width:1040px;margin:0 auto;padding:0 2rem 5rem;">
             <div id="campaignsArea">
-                <div class="empty-state">
-                    <div class="empty-icon">◫</div>
+                <div style="text-align:center;padding:4rem 2rem;color:var(--text3);font-size:13px;">
+                    <div style="font-size:36px;margin-bottom:12px;opacity:.25;">◫</div>
                     No campaigns loaded yet
                 </div>
             </div>
-
             <div class="status-msg" id="loadStatus"></div>
         </div>
+
+        <style>
+            @keyframes filterActive {
+                from {
+                    transform: scale(.95)
+                }
+
+                to {
+                    transform: scale(1)
+                }
+            }
+        </style>
+
     </div>
 
     <!-- ═══ CREATE PAGE ═════════════════════════════════════════ -->
@@ -1736,98 +2346,471 @@
     <!-- ═══ ABOUT PAGE ══════════════════════════════════════════ -->
     <div class="page" id="page-about">
 
-        <div class="about-hero">
-            <div class="about-hero-bg"></div>
-            <div class="about-hero-glow"></div>
-            <div class="hero-badge"
-                style="border-color:rgba(0,201,167,0.25);background:rgba(0,201,167,0.08);color:var(--teal);">🌿 Open
-                Source · Community Driven</div>
-            <h1 style="margin-top:1rem;">Building the future of<br><span>decentralised giving</span></h1>
-            <p>ChainFund was born out of a belief that fundraising should be open, borderless, and free from gatekeeping
-                — powered by code, not intermediaries.</p>
-        </div>
-
-        <div class="about-section">
-
-            <div style="margin-bottom:0.5rem" class="section-label">Our Mission</div>
-            <div class="mission-block">
-                <p>
-                    We believe <strong>financial infrastructure should be public</strong>. Traditional crowdfunding
-                    platforms take 5–8% fees, require identity verification, and restrict access by geography or banking
-                    status. ChainFund eliminates all of that.<br><br>
-                    By placing campaign logic entirely on the Ethereum blockchain, we ensure that <strong>creators
-                        receive exactly what backers pledge</strong>, deadline rules are enforced automatically, and
-                    every transaction is permanently auditable by anyone, anywhere, forever.
-                </p>
+        <!-- HERO -->
+        <section
+            style="position:relative;min-height:88vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 5rem;overflow:hidden;">
+            <!-- Orbs -->
+            <div
+                style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(212,136,10,0.10),transparent 70%);top:-120px;left:50%;transform:translateX(-50%);filter:blur(60px);animation:pulse-dot 6s ease-in-out infinite;pointer-events:none">
+            </div>
+            <div
+                style="position:absolute;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,149,124,0.07),transparent 70%);bottom:10%;right:8%;filter:blur(50px);animation:pulse-dot 6s 2s ease-in-out infinite;pointer-events:none">
+            </div>
+            <!-- Grid bg -->
+            <div
+                style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.04) 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse 90% 70% at 50% 40%,black 20%,transparent 80%);pointer-events:none">
             </div>
 
-            <div class="section-label" style="margin-bottom:1rem">Our Values</div>
-            <div class="values-grid">
-                <div class="value-card">
-                    <div class="value-icon">🔓</div>
-                    <h3>Openness</h3>
-                    <p>Our smart contract is fully open-source and verified on Etherscan. No black boxes.</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon">⚖️</div>
-                    <h3>Fairness</h3>
-                    <p>Zero platform fees. Every wei of ETH contributed goes directly toward the campaign goal.</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon">🌍</div>
-                    <h3>Inclusivity</h3>
-                    <p>If you have an Ethereum wallet, you can participate — regardless of where you live.</p>
-                </div>
-                <div class="value-card">
-                    <div class="value-icon">🛡️</div>
-                    <h3>Trust</h3>
-                    <p>Smart contract rules are immutable post-deploy. No admin keys, no rug pulls.</p>
-                </div>
+            <!-- Eyebrow -->
+            <div
+                style="display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:6px 16px 6px 8px;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:2rem;box-shadow:0 2px 12px rgba(0,0,0,0.06);position:relative;z-index:1;">
+                <div
+                    style="width:24px;height:24px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f0a820);display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;">
+                    ⟡</div>
+                Open Source · Community Driven · Built on Ethereum
             </div>
 
-            <div class="section-label" style="margin-bottom:1.25rem">The Team</div>
-            <div class="team-grid">
-                <div class="team-card">
-                    <div class="team-avatar av-gold">HY</div>
-                    <h3>Loh Hong Yi</h3>
-                    <div class="role">Founder & Smart Contract Dev</div>
-                    <p>Solidity engineer with 4+ years building DeFi primitives on Ethereum and Layer 2 networks.</p>
+            <!-- Headline -->
+            <h1
+                style="font-family:var(--ff-head);font-size:clamp(3rem,7vw,5.5rem);font-weight:800;line-height:1.02;letter-spacing:-0.03em;color:var(--text);position:relative;z-index:1;margin-bottom:1.5rem;">
+                Building the future<br>of
+                <span
+                    style="background:linear-gradient(135deg,var(--gold),#f0a820,var(--gold));background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">
+                    decentralised</span><br>
+                <span style="color:var(--teal);-webkit-text-fill-color:var(--teal)">giving</span>
+            </h1>
+
+            <p
+                style="font-size:1.1rem;color:var(--text2);max-width:560px;line-height:1.7;font-weight:300;position:relative;z-index:1;margin-bottom:3rem;">
+                ChainFund was born from a simple belief: fundraising should be open, borderless, and free from
+                gatekeeping — powered by code, not intermediaries.
+            </p>
+
+            <!-- Stats -->
+            <div
+                style="display:flex;background:var(--bg2);border:1px solid var(--border2);border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.06);position:relative;z-index:1;flex-wrap:wrap;">
+                <div style="padding:1.5rem 2.5rem;text-align:center;">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:var(--gold);letter-spacing:-0.02em;margin-bottom:4px;">
+                        3%</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">
+                        Platform Fees</div>
                 </div>
-                <div class="team-card">
-                    <div class="team-avatar av-teal">KT</div>
-                    <h3>Tan Ke Tian</h3>
-                    <div class="role">Lead Frontend Engineer</div>
-                    <p>Specialises in dApp UX — bridging the gap between web3 complexity and intuitive user interfaces.
+                <div style="padding:1.5rem 2.5rem;text-align:center;border-left:1px solid var(--border2);">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:var(--gold);letter-spacing:-0.02em;margin-bottom:4px;">
+                        100%</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">
+                        On-Chain</div>
+                </div>
+                <div style="padding:1.5rem 2.5rem;text-align:center;border-left:1px solid var(--border2);">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:var(--gold);letter-spacing:-0.02em;margin-bottom:4px;">
+                        ∞</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">
+                        Borderless</div>
+                </div>
+                <div style="padding:1.5rem 2.5rem;text-align:center;border-left:1px solid var(--border2);">
+                    <div
+                        style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:var(--gold);letter-spacing:-0.02em;margin-bottom:4px;">
+                        24/7</div>
+                    <div
+                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.1em;font-weight:500">
+                        Always On</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MISSION -->
+        <section
+            style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 2rem;">
+            <div
+                style="max-width:1000px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center;">
+
+                <!-- Visual -->
+                <div style="position:relative;height:320px;display:flex;align-items:center;justify-content:center;">
+                    <div
+                        style="position:absolute;width:280px;height:280px;border-radius:50%;border:1px solid rgba(212,136,10,0.15);animation:spin 20s linear infinite;">
+                    </div>
+                    <div
+                        style="position:absolute;width:200px;height:200px;border-radius:50%;border:1px solid rgba(212,136,10,0.25);animation:spin 15s linear infinite reverse;">
+                    </div>
+                    <div
+                        style="width:110px;height:110px;border-radius:50%;background:var(--gold-dim);border:1px solid var(--gold-glow);display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative;z-index:1;">
+                        ⟡</div>
+                    <div
+                        style="position:absolute;top:12%;right:2%;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600;color:var(--teal);box-shadow:0 2px 8px rgba(0,0,0,0.07);white-space:nowrap;">
+                        ✓ 3% Platform Fees</div>
+                    <div
+                        style="position:absolute;bottom:18%;left:0;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600;color:var(--gold);box-shadow:0 2px 8px rgba(0,0,0,0.07);white-space:nowrap;">
+                        🔒 Non-Custodial</div>
+                    <div
+                        style="position:absolute;top:48%;right:-5px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:600;color:var(--text3);box-shadow:0 2px 8px rgba(0,0,0,0.07);white-space:nowrap;">
+                        🌍 Permissionless</div>
+                </div>
+
+                <!-- Text -->
+                <div>
+                    <div
+                        style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                        <span
+                            style="display:inline-block;width:24px;height:2px;background:var(--gold);border-radius:2px;"></span>Our
+                        Mission
+                    </div>
+                    <h2
+                        style="font-family:var(--ff-head);font-size:1.75rem;font-weight:700;line-height:1.3;letter-spacing:-0.02em;color:var(--text);margin-bottom:1.25rem;">
+                        Financial infrastructure<br>should be <span style="color:var(--gold)">public</span>.
+                    </h2>
+                    <div
+                        style="height:1px;background:linear-gradient(90deg,var(--gold-glow),transparent);margin-bottom:1.25rem;">
+                    </div>
+                    <p style="font-size:0.95rem;color:var(--text2);line-height:1.8;font-weight:300;margin-bottom:1rem;">
+                        Traditional crowdfunding platforms take 5–8% in fees, require identity verification, and
+                        restrict access by geography or banking status. ChainFund eliminates all of that.
+                    </p>
+                    <p style="font-size:0.95rem;color:var(--text2);line-height:1.8;font-weight:300;">
+                        By placing campaign logic entirely on the Ethereum blockchain, creators receive exactly what
+                        backers pledge — deadline rules enforced automatically, every transaction permanently auditable
+                        by anyone, anywhere, forever.
                     </p>
                 </div>
-                <div class="team-card">
-                    <div class="team-avatar av-purple">Leon</div>
-                    <h3>Leon Chan Kai Xiang</h3>
-                    <div class="role">Blockchain Architect</div>
-                    <p>Protocol design and security audits. Previously a core contributor to two Ethereum DAOs.</p>
+            </div>
+        </section>
+
+        <!-- VALUES -->
+        <section style="padding:5rem 2rem;">
+            <div style="max-width:1000px;margin:0 auto;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                    <span
+                        style="display:inline-block;width:24px;height:2px;background:var(--gold);border-radius:2px;"></span>Our
+                    Values
                 </div>
-                <div class="team-card">
-                    <div class="team-avatar av-blue">KX</div>
-                    <h3>Tan Kai Xin</h3>
-                    <div class="role">Community & Growth</div>
-                    <p>Web3 community builder with a background in open-source governance and DAOs.</p>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.025em;color:var(--text);margin-bottom:0.75rem;">
+                    What we stand for</h2>
+                <p
+                    style="color:var(--text2);font-size:1rem;line-height:1.8;font-weight:300;max-width:540px;margin-bottom:3rem;">
+                    Every decision we make is guided by four principles that define how we build, ship, and support the
+                    ChainFund ecosystem.</p>
+
+                <div
+                    style="display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+
+                    <div class="value-hover-card"
+                        style="background:var(--bg2);padding:2.25rem;position:relative;overflow:hidden;transition:background 0.25s;">
+                        <div
+                            style="font-family:var(--ff-head);font-size:4rem;font-weight:800;color:rgba(212,136,10,0.06);position:absolute;top:1rem;right:1.5rem;line-height:1;letter-spacing:-0.04em;user-select:none;">
+                            01</div>
+                        <div
+                            style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem;background:var(--gold-dim);border:1px solid var(--gold-glow);">
+                            🔓</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                            Openness</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Our smart contract
+                            is fully open-source and verified on Etherscan. Every line of code is readable by anyone. No
+                            black boxes, no hidden logic — ever.</p>
+                    </div>
+
+                    <div class="value-hover-card"
+                        style="background:var(--bg2);padding:2.25rem;position:relative;overflow:hidden;transition:background 0.25s;">
+                        <div
+                            style="font-family:var(--ff-head);font-size:4rem;font-weight:800;color:rgba(212,136,10,0.06);position:absolute;top:1rem;right:1.5rem;line-height:1;letter-spacing:-0.04em;user-select:none;">
+                            02</div>
+                        <div
+                            style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.2);">
+                            ⚖️</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                            Fairness</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Zero platform fees
+                            on contributions. Every wei of ETH goes directly toward the campaign goal. We sustain
+                            ourselves through optional CTK mechanics, not by skimming backer funds.</p>
+                    </div>
+
+                    <div class="value-hover-card"
+                        style="background:var(--bg2);padding:2.25rem;position:relative;overflow:hidden;transition:background 0.25s;">
+                        <div
+                            style="font-family:var(--ff-head);font-size:4rem;font-weight:800;color:rgba(212,136,10,0.06);position:absolute;top:1rem;right:1.5rem;line-height:1;letter-spacing:-0.04em;user-select:none;">
+                            03</div>
+                        <div
+                            style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem;background:var(--gold-dim);border:1px solid var(--gold-glow);">
+                            🌍</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                            Inclusivity</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">If you have an
+                            Ethereum wallet, you can participate — regardless of where you live, what bank account you
+                            hold, or what government-issued ID you possess.</p>
+                    </div>
+
+                    <div class="value-hover-card"
+                        style="background:var(--bg2);padding:2.25rem;position:relative;overflow:hidden;transition:background 0.25s;">
+                        <div
+                            style="font-family:var(--ff-head);font-size:4rem;font-weight:800;color:rgba(212,136,10,0.06);position:absolute;top:1rem;right:1.5rem;line-height:1;letter-spacing:-0.04em;user-select:none;">
+                            04</div>
+                        <div
+                            style="width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:1.25rem;background:var(--teal-dim);border:1px solid rgba(0,149,124,0.2);">
+                            🛡️</div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:17px;font-weight:700;color:var(--text);margin-bottom:10px;">
+                            Trust</h3>
+                        <p style="font-size:13px;color:var(--text2);line-height:1.7;font-weight:300;">Smart contract
+                            rules are immutable post-deploy. No admin keys exist to change campaign terms. No rug pulls,
+                            no silent upgrades — what you see is what you get.</p>
+                    </div>
+
                 </div>
             </div>
+        </section>
 
-            <div class="tech-row">
-                <h3>Built with</h3>
-                <div class="tech-pills">
-                    <span class="tech-pill">Solidity 0.8</span>
-                    <span class="tech-pill">Ethereum</span>
-                    <span class="tech-pill">ethers.js v5</span>
-                    <span class="tech-pill">MetaMask</span>
-                    <span class="tech-pill">Hardhat</span>
-                    <span class="tech-pill">Etherscan Verified</span>
-                    <span class="tech-pill">IPFS</span>
+        <!-- TEAM -->
+        <section
+            style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:5rem 2rem;">
+            <div style="max-width:1000px;margin:0 auto;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                    <span
+                        style="display:inline-block;width:24px;height:2px;background:var(--gold);border-radius:2px;"></span>The
+                    Team
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.025em;color:var(--text);margin-bottom:0.75rem;">
+                    Built by people who<br>believe in the mission</h2>
+                <p style="color:var(--text2);font-size:1rem;line-height:1.8;font-weight:300;margin-bottom:3rem;">A
+                    small, focused team of engineers and community builders who ship fast and think long-term.</p>
+
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;">
+
+                    <!-- HY -->
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='var(--gold-glow)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(212,136,10,0.08)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="height:100px;background:linear-gradient(135deg,rgba(212,136,10,0.12),rgba(212,136,10,0.04));position:relative;display:flex;align-items:center;justify-content:center;">
+                            <div
+                                style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#f0a820);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-size:18px;font-weight:800;border:3px solid var(--bg2);box-shadow:0 4px 16px rgba(0,0,0,0.1);position:absolute;bottom:-28px;">
+                                HY</div>
+                        </div>
+                        <div style="padding:2rem 1.25rem 1.5rem;text-align:center;">
+                            <div
+                                style="font-family:var(--ff-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                                Loh Hong Yi</div>
+                            <div
+                                style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">
+                                Founder · Smart Contract</div>
+                            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-weight:300;">Solidity
+                                engineer with 4+ years building DeFi primitives on Ethereum and Layer 2 networks.</div>
+                        </div>
+                    </div>
+
+                    <!-- KT -->
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='var(--gold-glow)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(212,136,10,0.08)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="height:100px;background:linear-gradient(135deg,rgba(0,149,124,0.12),rgba(0,149,124,0.04));position:relative;display:flex;align-items:center;justify-content:center;">
+                            <div
+                                style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--teal),#00c4a0);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-size:18px;font-weight:800;border:3px solid var(--bg2);box-shadow:0 4px 16px rgba(0,0,0,0.1);position:absolute;bottom:-28px;">
+                                KT</div>
+                        </div>
+                        <div style="padding:2rem 1.25rem 1.5rem;text-align:center;">
+                            <div
+                                style="font-family:var(--ff-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                                Tan Ke Tian</div>
+                            <div
+                                style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">
+                                Lead Frontend</div>
+                            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-weight:300;">Specialises
+                                in dApp UX — bridging the gap between web3 complexity and intuitive interfaces.</div>
+                        </div>
+                    </div>
+
+                    <!-- Leon -->
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='var(--gold-glow)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(212,136,10,0.08)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="height:100px;background:linear-gradient(135deg,rgba(130,100,255,0.12),rgba(130,100,255,0.04));position:relative;display:flex;align-items:center;justify-content:center;">
+                            <div
+                                style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#8264ff,#a48fff);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-size:12px;font-weight:800;border:3px solid var(--bg2);box-shadow:0 4px 16px rgba(0,0,0,0.1);position:absolute;bottom:-28px;">
+                                Leon</div>
+                        </div>
+                        <div style="padding:2rem 1.25rem 1.5rem;text-align:center;">
+                            <div
+                                style="font-family:var(--ff-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                                Leon Chan Kai Xiang</div>
+                            <div
+                                style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">
+                                Blockchain Architect</div>
+                            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-weight:300;">Protocol
+                                design and security audits. Previously a core contributor to two Ethereum DAOs.</div>
+                        </div>
+                    </div>
+
+                    <!-- KX -->
+                    <div style="background:var(--bg);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:all 0.3s;"
+                        onmouseover="this.style.borderColor='var(--gold-glow)';this.style.transform='translateY(-4px)';this.style.boxShadow='0 16px 40px rgba(212,136,10,0.08)'"
+                        onmouseout="this.style.borderColor='var(--border)';this.style.transform='none';this.style.boxShadow='none'">
+                        <div
+                            style="height:100px;background:linear-gradient(135deg,rgba(79,154,255,0.12),rgba(79,154,255,0.04));position:relative;display:flex;align-items:center;justify-content:center;">
+                            <div
+                                style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#4f9aff,#7bbdff);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-size:18px;font-weight:800;border:3px solid var(--bg2);box-shadow:0 4px 16px rgba(0,0,0,0.1);position:absolute;bottom:-28px;">
+                                KX</div>
+                        </div>
+                        <div style="padding:2rem 1.25rem 1.5rem;text-align:center;">
+                            <div
+                                style="font-family:var(--ff-head);font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                                Tan Kai Xin</div>
+                            <div
+                                style="font-size:11px;color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;">
+                                Community · Growth</div>
+                            <div style="font-size:12px;color:var(--text2);line-height:1.6;font-weight:300;">Web3
+                                community builder with a background in open-source governance and DAOs.</div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
+        </section>
 
-        </div>
+        <!-- TECH STACK -->
+        <section style="padding:5rem 2rem;">
+            <div style="max-width:1000px;margin:0 auto;">
+                <div
+                    style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:1rem;">
+                    <span
+                        style="display:inline-block;width:24px;height:2px;background:var(--gold);border-radius:2px;"></span>Technology
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:clamp(2rem,4vw,3rem);font-weight:800;letter-spacing:-0.025em;color:var(--text);margin-bottom:0.75rem;">
+                    Battle-tested stack</h2>
+                <p style="color:var(--text2);font-size:1rem;line-height:1.8;font-weight:300;margin-bottom:3rem;">Every
+                    layer of ChainFund is built on proven, auditable, open-source technology.</p>
+
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;">
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">◈</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            Solidity 0.8</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Overflow protection & strict
+                            typing</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">⬡</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            Ethereum</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">World's most battle-tested
+                            blockchain</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">⟁</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            ethers.js v5</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Lightweight Ethereum library
+                        </div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">◉</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            MetaMask</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Industry-standard wallet
+                            extension</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">⚒</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            Hardhat</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Dev environment for testing &
+                            deploy</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">✓</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            Etherscan</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Verified & publicly auditable
+                            contract</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">◎</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            IPFS</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Decentralised file storage</div>
+                    </div>
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;transition:all 0.25s;"
+                        onmouseover="this.style.transform='translateY(-2px)';this.style.borderColor='var(--border2)';this.style.boxShadow='0 8px 24px rgba(0,0,0,0.05)'"
+                        onmouseout="this.style.transform='none';this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+                        <div style="font-size:1.75rem;margin-bottom:10px;">⬙</div>
+                        <div
+                            style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            CTK Token</div>
+                        <div style="font-size:11px;color:var(--text3);line-height:1.5;">Native utility token for staking
+                            & fees</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section style="padding:3rem 2rem 5rem;">
+            <div
+                style="max-width:720px;margin:0 auto;background:var(--bg2);border:1px solid var(--border2);border-radius:24px;padding:4rem 3rem;text-align:center;position:relative;overflow:hidden;">
+                <div
+                    style="position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:250px;background:radial-gradient(ellipse,rgba(212,136,10,0.1),transparent 70%);pointer-events:none;">
+                </div>
+                <div
+                    style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.03) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse 80% 80% at 50% 0%,black,transparent);pointer-events:none;">
+                </div>
+                <h2
+                    style="font-family:var(--ff-head);font-size:2.25rem;font-weight:800;letter-spacing:-0.02em;color:var(--text);margin-bottom:1rem;position:relative;">
+                    Ready to build with us?</h2>
+                <p style="font-size:1rem;color:var(--text2);margin-bottom:2.5rem;font-weight:300;position:relative;">
+                    Join creators and backers making ideas happen — transparently, on-chain.</p>
+                <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;">
+                    <button class="btn-hero btn-hero-primary" onclick="showTab('create')">Launch a Campaign →</button>
+                    <button class="btn-hero btn-hero-sec" onclick="showTab('campaigns')">Browse Campaigns</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- spin animation for mission rings -->
+        <style>
+            @keyframes spin {
+                to {
+                    transform: translate(-50%, -50%) rotate(360deg);
+                }
+            }
+
+            .value-hover-card:hover {
+                background: var(--bg3) !important;
+            }
+        </style>
+
     </div>
 
     <!-- ═══ HISTORY PAGE ══════════════════════════════════════ -->
@@ -1853,128 +2836,395 @@
         </div>
     </div>
 
-    <!-- ═══ STAKING PAGE ══════════════════════════════════════ -->
     <div class="page" id="page-staking">
-        <div class="campaigns-page">
-            <div class="page-header">
-                <div>
-                    <h2>CTK Staking</h2>
-                    <p>Stake your CTK tokens to earn daily rewards</p>
-                </div>
+
+        <!-- ── HERO ── -->
+        <section
+            style="position:relative;min-height:52vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5rem 2rem 4rem;overflow:hidden;">
+            <div
+                style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.045) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.045) 1px,transparent 1px);background-size:52px 52px;mask-image:radial-gradient(ellipse 100% 80% at 50% 0%,black 10%,transparent 75%);pointer-events:none;">
+            </div>
+            <div
+                style="position:absolute;width:500px;height:500px;border-radius:50%;background:radial-gradient(circle,rgba(212,136,10,0.12),transparent 68%);top:-140px;left:50%;transform:translateX(-50%);filter:blur(70px);animation:pulse-dot 7s ease-in-out infinite;pointer-events:none;">
+            </div>
+            <div
+                style="position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,rgba(0,149,124,0.08),transparent 70%);bottom:0;right:5%;filter:blur(60px);animation:pulse-dot 7s 3s ease-in-out infinite;pointer-events:none;">
             </div>
 
-            <!-- Info Banner -->
             <div
-                style="background:var(--gold-dim);border:1px solid var(--gold-glow);border-radius:var(--radius);padding:1.25rem 1.5rem;margin-bottom:1.5rem;font-size:13px;color:var(--text2);line-height:1.7;">
-                💡 <strong style="color:var(--gold);">How Staking Works</strong><br>
-                Stake your CTK tokens and earn <strong>1 CTK per 10 CTK staked per day</strong>.
-                Unstake anytime to get your tokens back plus rewards.
-                Holding <strong>10+ CTK</strong> also reduces your campaign withdrawal fee from 3% to 1%.
+                style="display:inline-flex;align-items:center;gap:8px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:5px 16px 5px 6px;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:1.75rem;box-shadow:0 2px 14px rgba(0,0,0,0.07);position:relative;z-index:2;">
+                <div
+                    style="display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,var(--gold),#f0a820);color:#fff;border-radius:100px;padding:3px 10px;font-size:11px;font-weight:600;">
+                    <span
+                        style="width:6px;height:6px;border-radius:50%;background:#fff;animation:pulse-dot 1.8s ease-in-out infinite;display:inline-block;"></span>Rewards
+                    Active
+                </div>
+                Earn CTK · Reduce Fees · Stay Liquid
             </div>
 
-            <!-- Stats Row -->
+            <h1
+                style="font-family:var(--ff-head);font-size:clamp(2.8rem,6vw,5rem);font-weight:800;line-height:1.02;letter-spacing:-0.03em;color:var(--text);position:relative;z-index:2;margin-bottom:1.25rem;">
+                Stake CTK.<br>Earn <span
+                    style="background:linear-gradient(135deg,#b8760a 0%,var(--gold) 40%,#f0a820 65%,var(--gold) 100%);background-size:200% auto;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">every
+                    day</span>.
+            </h1>
+            <p
+                style="font-size:1.05rem;color:var(--text2);max-width:520px;line-height:1.75;font-weight:300;position:relative;z-index:2;">
+                Lock your CTK tokens and earn 1 CTK per 10 staked daily. Unstake anytime. Holding 10+ CTK also cuts your
+                campaign withdrawal fee from 3% down to 1%.
+            </p>
+        </section>
+
+        <!-- ── BODY ── -->
+        <div
+            style="max-width:1040px;margin:0 auto;padding:0 2rem 5rem;display:grid;grid-template-columns:1fr 380px;gap:24px;align-items:start;">
+
+            <!-- STATS ROW -->
             <div
-                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;">
-                <div style="background:var(--bg2);padding:1.25rem;text-align:center;">
-                    <div style="font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--gold);"
-                        id="stakeAmount">—</div>
+                style="grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+                <div
+                    style="background:linear-gradient(135deg,#1a1208,#231608);padding:1.5rem 1.25rem;text-align:center;">
+                    <div style="font-family:var(--ff-head);font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:-0.025em;margin-bottom:4px;"
+                        id="stakeAmount">— CTK</div>
                     <div
-                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">
-                        CTK Staked</div>
+                        style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
+                        Your Stake</div>
+                    <div style="font-size:11px;color:var(--gold);margin-top:3px;font-weight:500;">Active</div>
                 </div>
-                <div style="background:var(--bg2);padding:1.25rem;text-align:center;">
-                    <div style="font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--teal);"
-                        id="stakePendingReward">—</div>
+                <div
+                    style="background:linear-gradient(135deg,#1a1208,#231608);padding:1.5rem 1.25rem;text-align:center;border-left:1px solid rgba(212,136,10,0.12);">
+                    <div style="font-family:var(--ff-head);font-size:1.75rem;font-weight:800;color:#fff;letter-spacing:-0.025em;margin-bottom:4px;"
+                        id="stakePendingReward">— CTK</div>
                     <div
-                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">
+                        style="font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
                         Pending Rewards</div>
+                    <div style="font-size:11px;color:rgba(0,196,160,0.8);margin-top:3px;font-weight:500;">Accruing</div>
                 </div>
-                <div style="background:var(--bg2);padding:1.25rem;text-align:center;">
-                    <div style="font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--text);"
+                <div style="background:var(--bg2);padding:1.5rem 1.25rem;text-align:center;transition:background .2s;"
+                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+                    <div style="font-family:var(--ff-head);font-size:1.75rem;font-weight:800;color:var(--gold);letter-spacing:-0.025em;margin-bottom:4px;"
                         id="stakeSince">—</div>
                     <div
-                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">
+                        style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
                         Staking Since</div>
+                    <div style="font-size:11px;color:var(--teal);margin-top:3px;font-weight:500;">On-chain</div>
                 </div>
-                <div style="background:var(--bg2);padding:1.25rem;text-align:center;">
-                    <div style="font-family:var(--ff-head);font-size:1.5rem;font-weight:700;color:var(--gold);"
-                        id="stakeWalletBal">—</div>
+                <div style="background:var(--bg2);padding:1.5rem 1.25rem;text-align:center;transition:background .2s;"
+                    onmouseover="this.style.background='var(--bg3)'" onmouseout="this.style.background='var(--bg2)'">
+                    <div style="font-family:var(--ff-head);font-size:1.75rem;font-weight:800;color:var(--gold);letter-spacing:-0.025em;margin-bottom:4px;"
+                        id="stakeWalletBal">— CTK</div>
                     <div
-                        style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:0.08em;margin-top:4px;">
-                        Wallet CTK</div>
+                        style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.12em;font-weight:500;">
+                        Wallet Balance</div>
+                    <div style="font-size:11px;color:var(--teal);margin-top:3px;font-weight:500;">Available</div>
                 </div>
             </div>
 
-            <!-- Stake Form -->
-            <div
-                style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;">
-                <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
-                    <div style="font-family:var(--ff-head);font-size:15px;font-weight:600;">Stake CTK</div>
-                    <div style="font-size:12px;color:var(--text2);margin-top:3px;">Lock your tokens to start earning
-                        rewards</div>
-                </div>
-                <div style="padding:1.25rem 1.5rem;">
-                    <div style="display:flex;gap:10px;align-items:flex-end;">
-                        <div style="flex:1;">
-                            <label
-                                style="display:block;font-size:11px;font-weight:500;color:var(--text2);margin-bottom:5px;">Amount
-                                to Stake</label>
-                            <div class="input-wrap">
-                                <input type="number" id="stakeInput" placeholder="e.g. 10" style="padding-right:50px;">
-                                <span class="input-sfx">CTK</span>
+            <!-- LEFT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:20px;">
+
+                <!-- STAKE CARD (dark) -->
+                <div
+                    style="background:linear-gradient(135deg,#1a1208,#1e1408);border:1px solid rgba(212,136,10,0.2);border-radius:20px;overflow:hidden;position:relative;box-shadow:0 0 20px rgba(212,136,10,0.12);">
+                    <div
+                        style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.035) 1px,transparent 1px);background-size:36px 36px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black,transparent);pointer-events:none;">
+                    </div>
+                    <div
+                        style="position:absolute;width:240px;height:180px;background:radial-gradient(ellipse,rgba(212,136,10,0.1),transparent 70%);top:-60px;right:20px;filter:blur(40px);pointer-events:none;">
+                    </div>
+                    <div
+                        style="padding:1.5rem 1.75rem 1.25rem;border-bottom:1px solid rgba(212,136,10,0.12);position:relative;">
+                        <div
+                            style="font-family:var(--ff-head);font-size:17px;font-weight:700;color:#fff;margin-bottom:3px;">
+                            Stake CTK Tokens</div>
+                        <div style="font-size:12px;color:rgba(255,255,255,0.4);font-weight:300;">Lock tokens to start
+                            earning daily rewards</div>
+                    </div>
+                    <div style="padding:1.5rem 1.75rem;position:relative;">
+                        <div
+                            style="display:flex;align-items:center;gap:10px;background:rgba(212,136,10,0.08);border:1px solid rgba(212,136,10,0.18);border-radius:10px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:rgba(255,255,255,0.6);line-height:1.5;">
+                            <span style="font-size:16px;flex-shrink:0;">💡</span>
+                            Earn <strong style="color:var(--gold);margin:0 3px;">1 CTK</strong> per <strong
+                                style="color:var(--gold);margin:0 3px;">10 CTK</strong> staked per day. Approve the
+                            contract before staking.
+                        </div>
+                        <div style="margin-bottom:16px;">
+                            <span
+                                style="display:block;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:rgba(255,255,255,0.4);margin-bottom:6px;">Amount
+                                to stake</span>
+                            <div style="display:flex;gap:10px;">
+                                <div style="position:relative;flex:1;">
+                                    <input type="number" id="stakeInput" placeholder="e.g. 10"
+                                        style="width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(212,136,10,0.2);border-radius:10px;padding:11px 46px 11px 14px;font-size:14px;color:#fff;font-family:var(--ff-body);outline:none;transition:border-color .2s;"
+                                        onfocus="this.style.borderColor='rgba(212,136,10,0.5)'"
+                                        onblur="this.style.borderColor='rgba(212,136,10,0.2)'">
+                                    <span
+                                        style="position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:600;color:rgba(212,136,10,0.7);pointer-events:none;">CTK</span>
+                                </div>
+                                <button id="stakeBtn" onclick="doStake()"
+                                    style="padding:11px 22px;background:linear-gradient(135deg,var(--gold),#f0a820);color:#fff;border:none;border-radius:10px;font-family:var(--ff-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;box-shadow:0 4px 16px rgba(212,136,10,0.3);"
+                                    onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-1px)'"
+                                    onmouseout="this.style.filter='none';this.style.transform='none'">Stake CTK</button>
                             </div>
                         </div>
-                        <button class="btn-send" id="stakeBtn" onclick="doStake()" style="background:var(--gold);">Stake
-                            CTK</button>
+                        <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:16px;line-height:1.5;">
+                            ⚠️ You must <strong style="color:rgba(255,255,255,0.5);">approve</strong> the staking
+                            contract in Token before staking.
+                        </div>
+                        <div class="inline-status" id="stakeStatus"></div>
                     </div>
-                    <div style="font-size:11px;color:var(--text3);margin-top:8px;">
-                        ⚠️ You must first <strong>approve</strong> the staking contract in Token before staking.
-                    </div>
-                    <div class="inline-status" id="stakeStatus" style="margin-top:10px;"></div>
                 </div>
-            </div>
 
-            <!-- Unstake -->
-            <div
-                style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:1.5rem;">
-                <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
-                    <div style="font-family:var(--ff-head);font-size:15px;font-weight:600;">Unstake</div>
-                    <div style="font-size:12px;color:var(--text2);margin-top:3px;">Withdraw all staked tokens and
-                        collect rewards</div>
-                </div>
-                <div style="padding:1.25rem 1.5rem;">
-                    <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;" id="unstakeDesc">
-                        You will receive your staked CTK back plus any pending rewards.
+                <!-- REWARD PROJECTION CHART -->
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+                    <div style="padding:1.5rem 1.75rem;border-bottom:1px solid var(--border);">
+                        <div
+                            style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                            Reward Projection</div>
+                        <div style="font-size:12px;color:var(--text2);font-weight:300;">Estimated CTK earnings over time
+                            (based on 10 CTK staked)</div>
                     </div>
-                    <button class="btn-action-full btn-do-refund" id="unstakeBtn" onclick="doUnstake()"
-                        style="background:var(--teal);">
-                        Unstake & Collect Rewards
-                    </button>
-                    <div class="inline-status" id="unstakeStatus" style="margin-top:10px;"></div>
+                    <div style="padding:1.5rem 1.75rem;">
+                        <div style="display:flex;align-items:flex-end;gap:6px;height:80px;margin-bottom:10px;">
+                            <div
+                                style="flex:1;height:12%;border-radius:5px 5px 0 0;background:var(--bg3);border:1px solid var(--border);">
+                            </div>
+                            <div
+                                style="flex:1;height:20%;border-radius:5px 5px 0 0;background:var(--bg3);border:1px solid var(--border);">
+                            </div>
+                            <div
+                                style="flex:1;height:30%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                            </div>
+                            <div
+                                style="flex:1;height:42%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                            </div>
+                            <div
+                                style="flex:1;height:55%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--gold),#f0a820);">
+                            </div>
+                            <div
+                                style="flex:1;height:68%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--teal),#00c4a0);">
+                            </div>
+                            <div
+                                style="flex:1;height:82%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--teal),#00c4a0);">
+                            </div>
+                            <div
+                                style="flex:1;height:100%;border-radius:5px 5px 0 0;background:linear-gradient(180deg,var(--teal),#00c4a0);">
+                            </div>
+                        </div>
+                        <div style="display:flex;gap:6px;margin-bottom:1rem;">
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                1</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                2</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                3</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                4</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                5</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                6</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                7</div>
+                            <div style="flex:1;text-align:center;font-size:10px;color:var(--text3);font-weight:500;">Day
+                                8</div>
+                        </div>
+                        <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);">
+                                <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);"></div>
+                                Accruing
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);">
+                                <div style="width:8px;height:8px;border-radius:50%;background:var(--teal);"></div>
+                                Compounding
+                            </div>
+                            <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);">
+                                <div
+                                    style="width:8px;height:8px;border-radius:50%;background:var(--bg3);border:1px solid var(--border2);">
+                                </div>Pre-stake
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <!-- Staking History -->
-            <div
-                style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+                <!-- HOW IT WORKS (dark strip) -->
                 <div
-                    style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <div style="font-family:var(--ff-head);font-size:15px;font-weight:600;">Staking History</div>
-                        <div style="font-size:12px;color:var(--text2);margin-top:3px;">Your past staking activity</div>
+                    style="background:linear-gradient(135deg,#1a1208,#1e1408);border:1px solid rgba(212,136,10,0.18);border-radius:20px;padding:1.5rem;position:relative;overflow:hidden;">
+                    <div
+                        style="position:absolute;inset:0;background-image:linear-gradient(rgba(212,136,10,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(212,136,10,0.04) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(ellipse 90% 80% at 50% 0%,black,transparent);pointer-events:none;">
                     </div>
-                    <button class="btn-load" onclick="loadStakingInfo()" style="padding:7px 16px;font-size:12px;">↻
-                        Refresh</button>
-                </div>
-                <div id="stakingHistory" style="padding:1.25rem 1.5rem;">
-                    <div class="empty-state">
-                        <div class="empty-icon">◫</div>
-                        No staking activity yet
+                    <div
+                        style="display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:1.25rem;position:relative;">
+                        <span
+                            style="width:20px;height:2px;background:var(--gold);border-radius:2px;display:block;"></span>How
+                        Staking Works
+                    </div>
+                    <div
+                        style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(212,136,10,0.12);border-radius:12px;overflow:hidden;position:relative;">
+                        <div style="background:rgba(255,255,255,0.04);padding:1.25rem;transition:background .2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.07)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                            <div
+                                style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:rgba(212,136,10,0.2);line-height:1;margin-bottom:.5rem;">
+                                01</div>
+                            <h4
+                                style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;">
+                                Approve Contract</h4>
+                            <p style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;font-weight:300;">Grant
+                                the staking contract permission to spend your CTK. One-time setup.</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.04);padding:1.25rem;transition:background .2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.07)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                            <div
+                                style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:rgba(212,136,10,0.2);line-height:1;margin-bottom:.5rem;">
+                                02</div>
+                            <h4
+                                style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;">
+                                Stake Your CTK</h4>
+                            <p style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;font-weight:300;">Enter
+                                amount and stake. Rewards begin accruing immediately in the smart contract.</p>
+                        </div>
+                        <div style="background:rgba(255,255,255,0.04);padding:1.25rem;transition:background .2s;"
+                            onmouseover="this.style.background='rgba(255,255,255,0.07)'"
+                            onmouseout="this.style.background='rgba(255,255,255,0.04)'">
+                            <div
+                                style="font-family:var(--ff-head);font-size:2rem;font-weight:800;color:rgba(212,136,10,0.2);line-height:1;margin-bottom:.5rem;">
+                                03</div>
+                            <h4
+                                style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:#fff;margin-bottom:5px;">
+                                Unstake & Collect</h4>
+                            <p style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;font-weight:300;">
+                                Unstake after the lock period to get your CTK plus all accumulated rewards.</p>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-        </div>
+                <!-- DISCOUNT BANNER -->
+                <div
+                    style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.5rem;display:flex;align-items:center;gap:16px;">
+                    <div
+                        style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,var(--gold),#f0a820);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">
+                        💰</div>
+                    <div>
+                        <h3
+                            style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;">
+                            Holding 10+ CTK unlocks a fee discount</h3>
+                        <p style="font-size:12px;color:var(--text2);line-height:1.6;font-weight:300;">Campaign creators
+                            with 10 or more CTK pay just <strong>1% withdrawal fee</strong> instead of the standard 3% —
+                            simply by holding.</p>
+                    </div>
+                    <div
+                        style="margin-left:auto;flex-shrink:0;background:var(--gold-dim);border:1px solid var(--gold-glow);color:var(--gold);border-radius:100px;padding:6px 16px;font-size:12px;font-weight:600;white-space:nowrap;">
+                        1% Fee Tier</div>
+                </div>
+
+            </div><!-- end left col -->
+
+            <!-- RIGHT COLUMN -->
+            <div style="display:flex;flex-direction:column;gap:20px;position:sticky;top:80px;">
+
+                <!-- UNSTAKE CARD -->
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;transition:border-color .2s;"
+                    onmouseover="this.style.borderColor='var(--border2)'"
+                    onmouseout="this.style.borderColor='var(--border)'">
+                    <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+                        <div
+                            style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                            Unstake & Collect</div>
+                        <div style="font-size:12px;color:var(--text2);font-weight:300;">Withdraw tokens and claim all
+                            rewards</div>
+                    </div>
+                    <div style="padding:1.25rem 1.5rem;">
+                        <div style="font-size:12px;color:var(--text2);margin-bottom:16px;line-height:1.7;"
+                            id="unstakeDesc">You will receive your staked CTK back plus any pending rewards when you
+                            unstake.</div>
+                        <!-- Summary -->
+                        <div
+                            style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:16px;">
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:8px;">
+                                <span style="color:var(--text3);">Staked amount</span>
+                                <span style="font-weight:600;color:var(--text);" id="unstakeStaked">—</span>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:10px;">
+                                <span style="color:var(--text3);">Pending rewards</span>
+                                <span style="font-weight:600;color:var(--teal);" id="unstakeRewards">—</span>
+                            </div>
+                            <div style="height:1px;background:var(--border);margin-bottom:10px;"></div>
+                            <div style="display:flex;justify-content:space-between;font-size:13px;">
+                                <span style="color:var(--text2);font-weight:500;">Total to receive</span>
+                                <span style="font-weight:700;color:var(--gold);" id="unstakeTotal">—</span>
+                            </div>
+                        </div>
+                        <button id="unstakeBtn" onclick="doUnstake()"
+                            style="width:100%;padding:13px;background:linear-gradient(135deg,var(--teal),#00c4a0);color:#fff;border:none;border-radius:10px;font-family:var(--ff-body);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;box-shadow:0 4px 16px rgba(0,149,124,0.2);"
+                            onmouseover="this.style.filter='brightness(1.1)';this.style.transform='translateY(-1px)'"
+                            onmouseout="this.style.filter='none';this.style.transform='none'">🔓 Unstake & Collect
+                            Rewards</button>
+                        <div class="inline-status" id="unstakeStatus"></div>
+                    </div>
+                </div>
+
+                <!-- STAKING HISTORY -->
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;overflow:hidden;">
+                    <div
+                        style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div
+                                style="font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;">
+                                Staking History</div>
+                            <div style="font-size:12px;color:var(--text2);font-weight:300;">Your active staking position
+                            </div>
+                        </div>
+                        <button onclick="loadStakingInfo()"
+                            style="font-size:12px;font-weight:500;color:var(--teal);background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:var(--ff-body);transition:all .2s;"
+                            onmouseover="this.style.background='rgba(0,149,124,0.15)'"
+                            onmouseout="this.style.background='var(--teal-dim)'">↻ Refresh</button>
+                    </div>
+                    <div id="stakingHistory" style="padding:1.25rem 1.5rem;">
+                        <div style="text-align:center;padding:2.5rem 1rem;color:var(--text3);font-size:13px;">
+                            <div style="font-size:28px;margin-bottom:8px;opacity:.3;">◫</div>
+                            No staking activity yet
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAILY RATE CARD -->
+                <div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:1.5rem;transition:border-color .2s;"
+                    onmouseover="this.style.borderColor='var(--border2)'"
+                    onmouseout="this.style.borderColor='var(--border)'">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem;">
+                        <div>
+                            <div
+                                style="font-family:var(--ff-head);font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px;">
+                                Daily Reward Rate</div>
+                            <div style="font-size:11px;color:var(--text3);">Per 10 CTK staked</div>
+                        </div>
+                        <div
+                            style="background:var(--teal-dim);border:1px solid rgba(0,149,124,0.18);color:var(--teal);border-radius:100px;padding:4px 12px;font-size:11px;font-weight:600;">
+                            Live</div>
+                    </div>
+                    <div
+                        style="font-family:var(--ff-head);font-size:2.75rem;font-weight:800;color:var(--gold);letter-spacing:-0.03em;line-height:1;margin-bottom:4px;">
+                        1 CTK</div>
+                    <div style="font-size:12px;color:var(--text2);margin-bottom:1.25rem;font-weight:300;">earned per day
+                        per 10 CTK staked</div>
+                    <div style="height:3px;background:var(--bg3);border-radius:4px;overflow:hidden;">
+                        <div
+                            style="height:100%;width:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--gold));">
+                        </div>
+                    </div>
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-top:6px;">
+                        <span>Rate fixed by contract</span>
+                        <span style="color:var(--teal);font-weight:500;">Immutable ✓</span>
+                    </div>
+                </div>
+
+            </div><!-- end right col -->
+
+        </div><!-- end body grid -->
+
     </div>
 
     <!-- ═══ FOOTER ══════════════════════════════════════════════ -->
@@ -2352,6 +3602,7 @@
             const now = Math.floor(Date.now() / 1000);
             const isActive = now < c.deadline.toNumber();
             const reached = raised >= goal;
+            const statusTag = c.withdrawn ? 'reached' : reached ? 'reached' : isActive ? 'active' : 'ended';
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
             const remaining = Math.max(0, goal - raised);
 
@@ -2407,7 +3658,7 @@
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -2694,6 +3945,37 @@
                 `Fee: <strong>${useCTK ? '1%' : '3%'}</strong> → You receive <strong>${receives.toFixed(4)} ETH</strong>`;
         }
 
+        function filterCampaigns(type, btn) {
+            // Reset all filter buttons
+            document.querySelectorAll('#filterBar button').forEach(b => {
+                b.classList.remove('fpill-active');
+                b.style.background = 'var(--bg2)';
+                b.style.borderColor = 'var(--border2)';
+                b.style.color = 'var(--text2)';
+                b.style.fontWeight = '500';
+            });
+            // Activate clicked
+            btn.classList.add('fpill-active');
+            btn.style.background = 'var(--gold)';
+            btn.style.borderColor = 'var(--gold)';
+            btn.style.color = '#fff';
+            btn.style.fontWeight = '600';
+
+            const cards = document.querySelectorAll('.cmp-card');
+            let visible = 0;
+            cards.forEach(card => {
+                const status = card.dataset.status || 'active';
+                const show = type === 'all'
+                    || (type === 'active' && status === 'active')
+                    || (type === 'reached' && status === 'reached')
+                    || (type === 'ended' && status === 'ended');
+                card.style.display = show ? '' : 'none';
+                if (show) visible++;
+            });
+            document.getElementById('filterCount').textContent =
+                type !== 'all' ? visible + ' shown' : '';
+        }
+
         /* ── Staking ── */
         async function loadStakingInfo() {
             if (!stakingContract || !currentUserAddress) return;
@@ -2715,6 +3997,11 @@
                     document.getElementById('stakeSince').textContent = sinceDate;
                     document.getElementById('unstakeDesc').textContent =
                         `You will receive ${amount} CTK staked + ${reward} CTK rewards = ${(parseFloat(amount) + parseFloat(reward)).toFixed(4)} CTK total.`;
+
+                    // ── Populate unstake summary card ──
+                    document.getElementById('unstakeStaked').textContent = amount + ' CTK';
+                    document.getElementById('unstakeRewards').textContent = reward + ' CTK';
+                    document.getElementById('unstakeTotal').textContent = (parseFloat(amount) + parseFloat(reward)).toFixed(4) + ' CTK';
 
                     // ── Show history
                     const timeLeft = await stakingContract.timeUntilUnlock(currentUserAddress);
