@@ -2243,6 +2243,12 @@
                     onmouseover="this.style.borderColor='var(--border2)';this.style.color='var(--text3)'"
                     onmouseout="if(!this.classList.contains('fpill-active')){this.style.borderColor='var(--border2)';this.style.color='var(--text2)'}">◌
                     Ended</button>
+                <button onclick="filterCampaigns('mine',this)"
+                    style="display:inline-flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border2);border-radius:100px;padding:7px 16px;font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:all .2s;font-family:var(--ff-body);"
+                    onmouseover="this.style.borderColor='var(--gold)';this.style.color='var(--gold)'"
+                    onmouseout="if(!this.classList.contains('fpill-active')){this.style.borderColor='var(--border2)';this.style.color='var(--text2)'}">
+                    ⟡ My Campaigns
+                </button>
             </div>
             <span style="font-size:13px;color:var(--text3);font-weight:400;" id="filterCount"></span>
         </div>
@@ -3428,11 +3434,14 @@
             const seconds = durationUnit === 'minutes' ? val * 60
                 : durationUnit === 'hours' ? val * 3600
                     : val * 86400;
-            return Math.max(60, Math.floor(seconds));
+
+            // ✅ Return exact Unix epoch deadline instead of duration
+            const deadlineTimestamp = Math.floor(Date.now() / 1000) + Math.floor(seconds);
+            return deadlineTimestamp;
         }
 
-        const contractAddress = "0x8697DF8032a0Abc8E48aD496EB7D20054726BC44";
-        const tokenAddress = "0x45bC4D779357F1cbdb1852e1FD4CdAc2aeCF848c"; // ← paste Token.sol address
+        const contractAddress = "0x3b777CCBB4e04f84bD7AEB02a28568e4d0B92539";
+        const tokenAddress = "0x04Ef050d0422E49dde8A004D4CE7eF6789272363"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3468,11 +3477,22 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => t.classList.remove('active'));
             document.getElementById('page-' + name).classList.add('active');
+
+            const prefixMap = {
+                home: 'home',
+                campaigns: 'camp',
+                create: 'create',
+                about: 'about',
+                history: 'hist',
+                staking: 'stak'
+            };
+            const prefix = prefixMap[name] || name;
             document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => {
-                if (t.textContent.trim().toLowerCase().startsWith(
-                    name === 'home' ? 'home' : name === 'campaigns' ? 'camp' : name === 'create' ? 'create' : 'about'
-                )) t.classList.add('active');
+                if (t.textContent.trim().toLowerCase().startsWith(prefix)) {
+                    t.classList.add('active');
+                }
             });
+
             window.scrollTo(0, 0);
         }
 
@@ -3574,19 +3594,20 @@
                 const contribs = await Promise.all(contribPromises);
                 const ctkRaw = await tokenContract.balanceOf(currentUserAddress);
                 const ctkBal = parseFloat(ethers.utils.formatUnits(ctkRaw, 18));
-
+                const creatorPromises = all.map(c => contract.users(c.creator));
+                const creatorData = await Promise.all(creatorPromises);
                 // Pair each campaign with its original index before sorting
                 const paired = all.map((c, i) => ({ c, i, contrib: contribs[i] }));
 
-                // ✅ Get on-chain timestamp
+
                 const latestBlock = await provider.getBlock('latest');
                 const onchainNow = latestBlock.timestamp;
                 const browserNow = Math.floor(Date.now() / 1000);
-                const effectiveNow = Math.max(onchainNow, browserNow); // ✅ add this
+                const effectiveNow = Math.max(onchainNow, browserNow);
 
                 paired.sort((a, b) => {
                     const statusScore = (item) => {
-                        const isActive = effectiveNow < item.c.deadline.toNumber(); // ✅ effectiveNow
+                        const isActive = effectiveNow < item.c.deadline.toNumber();
                         const reached = parseFloat(ethers.utils.formatEther(item.c.amountRaised)) >= parseFloat(ethers.utils.formatEther(item.c.goal));
                         if (isActive && !reached) return 0;
                         if (isActive && reached) return 1;
@@ -3596,7 +3617,8 @@
                     return statusScore(a) - statusScore(b);
                 });
 
-                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal, effectiveNow)).join('');
+                const html = paired.map(({ c, i, contrib }) =>
+                    buildCard(i, c, contrib, ctkBal, effectiveNow, creatorData[i])).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
                 startCountdowns();
             } catch (err) {
@@ -3616,7 +3638,8 @@
             } catch (e) { }
         }
 
-        function buildCard(id, c, myContrib, ctkBal, onchainNow) {
+
+        function buildCard(id, c, myContrib, ctkBal, onchainNow, creatorInfo) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
             const myEth = parseFloat(ethers.utils.formatEther(myContrib || 0));
@@ -3641,9 +3664,11 @@
             const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
             const canWithdraw = isCreator && reached && !c.withdrawn;
             const canRefund = myEth > 0 && !isActive && !reached;
-            const creatorMustRefund = isCreator && !isActive && !reached &&
+            // ✅ Show refund button if campaign failed — let contract decide if timing is right
+            const creatorMustRefund = isCreator && !reached &&
                 parseFloat(ethers.utils.formatEther(c.amountRaised)) > 0 &&
-                !c.refunded;  // hide button if already refunded
+                !c.refunded &&
+                !isActive; // isActive already uses effectiveNow
 
             const hasCTK = (ctkBal || 0) >= 10;
 
@@ -3707,7 +3732,7 @@
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}" data-creator="${c.creator.toLowerCase()}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -3747,7 +3772,10 @@
   ${withdrawPanel}
   ${refundPanel}
   <div class="cmp-footer">
-    <span class="cmp-creator">Creator: ${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</span>
+    <span class="cmp-creator">
+      Creator: <b style="color:var(--text2);">${creatorInfo && creatorInfo.registered ? escHtml(creatorInfo.name) : ''}</b>
+      <span style="color:var(--text3);font-size:10px;">(${c.creator.slice(0, 6)}...${c.creator.slice(-4)})</span>
+    </span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn-toggle" id="toggle-${id}" onclick="toggleContrib(${id})" ${canContrib ? '' : 'disabled'}>
         ${canContrib ? 'Contribute' : 'Closed'}
@@ -3865,18 +3893,18 @@
             setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
             try {
                 const tx = await contract.autoRefundAll(id);
-                setInlineStatus(statEl, 'loading', 'Confirming — sending ETH to all contributors…');
+                setInlineStatus(statEl, 'loading', 'Confirming…');
                 await tx.wait();
-                setInlineStatus(statEl, 'success', '✓ Done! All contributors have been refunded to their wallets.');
+                setInlineStatus(statEl, 'success', '✓ Done! All contributors refunded.');
                 btn.style.display = 'none';
                 await loadAllCampaigns();
             } catch (err) {
-                setInlineStatus(statEl, 'error', err.reason || err.message);
+                const reason = err.reason || err.data?.message || err.error?.message || err.message;
+                setInlineStatus(statEl, 'error', reason);
                 btn.disabled = false;
                 btn.innerHTML = 'Refund All Contributors';
             }
         }
-
         function setInlineStatus(el, type, msg) {
             const styles = {
                 success: { bg: 'rgba(0,201,167,0.08)', border: 'rgba(0,201,167,0.2)', color: 'var(--teal)' },
@@ -3939,14 +3967,13 @@
                 const end = parseInt(card.dataset.deadline);
                 if (!end) return;
 
-                // ✅ If already expired at render time, don't start a ticker
                 if (Math.floor(Date.now() / 1000) >= end) {
                     el.textContent = 'Expired';
                     el.style.color = 'var(--text3)';
                     return;
                 }
 
-                let reloaded = false; // ✅ guard flag
+                let reloaded = false;
 
                 function tick() {
                     const now = Math.floor(Date.now() / 1000);
@@ -3954,9 +3981,11 @@
                     if (diff <= 0) {
                         el.textContent = 'Expired';
                         el.style.color = 'var(--text3)';
-                        if (!reloaded) {        // ✅ only reload once per card
+                        if (!reloaded) {
                             reloaded = true;
-                            loadAllCampaigns();
+                            // ✅ Wait 30 extra seconds after browser says expired
+                            // to give the blockchain time to catch up
+                            setTimeout(() => loadAllCampaigns(), 30000);
                         }
                         return;
                     }
@@ -3970,9 +3999,13 @@
                     } else if (h > 0) {
                         el.textContent = h + 'H ' + m + 'M ' + s + 'S';
                         el.style.color = 'var(--gold)';
-                    } else {
+                    } else if (m > 0) {
                         el.textContent = m + 'M ' + s + 'S';
                         el.style.color = 'var(--red)';
+                    } else {
+                        // ✅ Show a "waiting for blockchain" message in the last 60 seconds
+                        el.textContent = s + 'S (syncing…)';
+                        el.style.color = 'var(--text3)';
                     }
                     setTimeout(tick, 1000);
                 }
@@ -4065,7 +4098,8 @@
                 const show = type === 'all'
                     || (type === 'active' && status === 'active')
                     || (type === 'reached' && status === 'reached')
-                    || (type === 'ended' && status === 'ended');
+                    || (type === 'ended' && status === 'ended')
+                    || (type === 'mine' && card.dataset.creator === currentUserAddress?.toLowerCase());
                 card.style.display = show ? '' : 'none';
                 if (show) visible++;
             });
