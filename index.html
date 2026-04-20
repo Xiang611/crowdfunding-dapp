@@ -3431,8 +3431,8 @@
             return Math.max(60, Math.floor(seconds));
         }
 
-        const contractAddress = "0xFEa072857228fa3c582FF2eE4F8820c9d3711049";
-        const tokenAddress = "0x001808CF18CF1E130882D5c27acd8282b87891eC"; // ← paste Token.sol address
+        const contractAddress = "0x4C1E99ba7D0AF6A444e52FfB15Fc921116a9D45f";
+        const tokenAddress = "0x1f5D0953803921f032908E5eEe204A352CFf5bc6"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3443,8 +3443,8 @@
             "function createCampaign(string title, string description, uint goal, uint durationInSeconds)",
             "function contribute(uint id) payable",
             "function withdraw(uint id, bool useCTKDiscount)",
-            "function refund(uint id)",
-            "function campaigns(uint) view returns (address creator, string title, string description, uint goal, uint deadline, uint amountRaised, bool withdrawn)",
+            "function autoRefundAll(uint id)",
+            "function campaigns(uint) view returns (address creator, string title, string description, uint goal, uint deadline, uint amountRaised, bool withdrawn, bool refunded)",
             "function getCampaignCount() view returns (uint)",
             "function contributions(uint, address) view returns (uint)",
             "function registerUser(string name, string email)",
@@ -3575,8 +3575,27 @@
                 const ctkRaw = await tokenContract.balanceOf(currentUserAddress);
                 const ctkBal = parseFloat(ethers.utils.formatUnits(ctkRaw, 18));
 
-                const html = all.map((c, i) => buildCard(i, c, contribs[i], ctkBal)).join('');
+                // ✅ Get on-chain timestamp — matches what the contract sees
+                const latestBlock = await provider.getBlock('latest');
+                const onchainNow = latestBlock.timestamp;
+
+                // ── Sort campaigns ──
+                const paired = all.map((c, i) => ({ c, i, contrib: contribs[i] }));
+                paired.sort((a, b) => {
+                    const statusScore = (item) => {
+                        const isActive = onchainNow < item.c.deadline.toNumber();
+                        const reached = parseFloat(ethers.utils.formatEther(item.c.amountRaised)) >= parseFloat(ethers.utils.formatEther(item.c.goal));
+                        if (isActive && !reached) return 0;
+                        if (isActive && reached)  return 1;
+                        if (!isActive && reached) return 2;
+                        return 3;
+                    };
+                    return statusScore(a) - statusScore(b);
+                });
+
+                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal, onchainNow)).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
+                startCountdowns();
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
             } finally {
@@ -3594,13 +3613,12 @@
             } catch (e) { }
         }
 
-        function buildCard(id, c, myContrib, ctkBal) {
+        function buildCard(id, c, myContrib, ctkBal, onchainNow) {
             const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
             const myEth = parseFloat(ethers.utils.formatEther(myContrib || 0));
             const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
-            const now = Math.floor(Date.now() / 1000);
-            const isActive = now < c.deadline.toNumber();
+            const isActive = onchainNow < c.deadline.toNumber();
             const reached = raised >= goal;
             const statusTag = c.withdrawn ? 'reached' : reached ? 'reached' : isActive ? 'active' : 'ended';
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -3617,7 +3635,9 @@
             const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
             const canWithdraw = isCreator && reached && !c.withdrawn;
             const canRefund = myEth > 0 && !isActive && !reached;
-
+            const creatorMustRefund = isCreator && !isActive && !reached && 
+                parseFloat(ethers.utils.formatEther(c.amountRaised)) > 0 &&
+                !c.refunded;  // hide button if already refunded
 
             const hasCTK = (ctkBal || 0) >= 10;
 
@@ -3649,16 +3669,39 @@
                     <div class="inline-status" id="wstatus-${id}"></div>
                 </div>` : '';
 
-            const refundPanel = canRefund ? `
-            <div class="cmp-refund-panel" id="rpanel-${id}">
-                <div class="panel-label panel-label-red">Claim Refund</div>
-                <div class="panel-desc">This campaign did not reach its goal. Claim back your <b>${myEth.toFixed(4)} ETH</b>.</div>
-                <button class="btn-action-full btn-do-refund" id="rbtn-${id}" onclick="doRefund(${id})">Refund ${myEth.toFixed(4)} ETH</button>
+            const refundPanel = creatorMustRefund ? `
+            <div class="cmp-refund-panel" id="rpanel-${id}" style="display:block;">
+                <div class="panel-label panel-label-red">Action Required</div>
+                <div class="panel-desc">
+                    Your campaign did not reach its goal. Click below to refund 
+                    <strong>all contributors</strong> in one transaction — their ETH 
+                    will be sent directly to their wallets automatically.
+                </div>
+                <button class="btn-action-full btn-do-refund" id="rbtn-${id}" onclick="doAutoRefund(${id})">
+                    Refund All Contributors
+                </button>
                 <div class="inline-status" id="rstatus-${id}"></div>
+            </div>`
+            : canRefund ? `
+            <div class="cmp-refund-panel" id="rpanel-${id}" style="display:block;">
+                ${c.refunded ? `
+                    <div class="panel-label" style="color:var(--teal);">Refund Processed</div>
+                    <div class="panel-desc">
+                        <span style="font-size:16px;">✓</span>
+                        Your <b>${myEth.toFixed(4)} ETH</b> has been refunded to your wallet.
+                    </div>
+                ` : `
+                    <div class="panel-label panel-label-red">Refund Pending</div>
+                    <div class="panel-desc" style="display:flex;align-items:flex-start;gap:8px;">
+                        <span style="font-size:16px;flex-shrink:0;">⏳</span>
+                        <span>This campaign failed. The creator needs to trigger the refund. 
+                        Your <b>${myEth.toFixed(4)} ETH</b> will be returned directly to your wallet.</span>
+                    </div>
+                `}
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}" data-status="${statusTag}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -3675,8 +3718,8 @@
     <div class="cmp-track"><div class="${fillClass}" style="width:${pct}%"></div></div>
     <div class="cmp-meta">
       <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
-      <span>Deadline: <b>${deadline}</b></span>
-      <span>Backers: <b>—</b></span>
+        <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>      
+        <span>Backers: <b>—</b></span>
     </div>
   </div>
   <div class="cmp-contribute-panel" id="panel-${id}">
@@ -3704,7 +3747,7 @@
         ${canContrib ? 'Contribute' : 'Closed'}
       </button>
       ${canWithdraw ? `<button class="btn-withdraw" onclick="toggleWithdraw(${id})">Withdraw</button>` : ''}
-      ${canRefund ? `<button class="btn-refund"   onclick="toggleRefund(${id})">Get Refund</button>` : ''}
+        ${creatorMustRefund ? `<button class="btn-refund" onclick="toggleRefund(${id})">Refund Contributors</button>` : ''}
     </div>
   </div>
 </div>`;
@@ -3808,25 +3851,23 @@
             }
         }
 
-        async function doRefund(id) {
+        async function doAutoRefund(id) {
             const btn = document.getElementById('rbtn-' + id);
             const statEl = document.getElementById('rstatus-' + id);
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span>Claiming refund...';
+            btn.innerHTML = '<span class="spinner"></span>Processing refunds...';
             setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
             try {
-                const tx = await contract.refund(id);
-                setInlineStatus(statEl, 'loading', 'Confirming transaction…');
+                const tx = await contract.autoRefundAll(id);
+                setInlineStatus(statEl, 'loading', 'Confirming — sending ETH to all contributors…');
                 await tx.wait();
-                setInlineStatus(statEl, 'success', '✓ Refund sent to your wallet!');
+                setInlineStatus(statEl, 'success', '✓ Done! All contributors have been refunded to their wallets.');
                 btn.style.display = 'none';
-                const footerBtn = document.getElementById('refund-footer-' + id);
-                if (footerBtn) footerBtn.style.display = 'none';
                 await loadAllCampaigns();
             } catch (err) {
                 setInlineStatus(statEl, 'error', err.reason || err.message);
                 btn.disabled = false;
-                btn.innerHTML = 'Refund ETH';
+                btn.innerHTML = 'Refund All Contributors';
             }
         }
 
@@ -3883,6 +3924,51 @@
             }
         }
 
+        function startCountdowns() {
+            document.querySelectorAll('.cmp-card').forEach(card => {
+                const id = card.id.replace('card-', '');
+                const el = document.getElementById('deadline-' + id);
+                if (!el) return;
+
+                const end = parseInt(card.dataset.deadline);
+                if (!end) return;
+
+                let expired = false;  // ✅ guard against repeat triggers
+
+                function tick() {
+                    const now = Math.floor(Date.now() / 1000);
+                    const diff = end - now;
+                    if (diff <= 0) {
+                        if (expired) return;  // ✅ only fire once
+                        expired = true;
+                        el.textContent = 'Expired';
+                        el.style.color = 'var(--text3)';
+                        provider.send("evm_mine", []).then(() => {
+                            loadAllCampaigns();
+                        }).catch(() => {
+                            loadAllCampaigns();
+                        });
+                        return;
+                    }
+                    const d = Math.floor(diff / 86400);
+                    const h = Math.floor((diff % 86400) / 3600);
+                    const m = Math.floor((diff % 3600) / 60);
+                    const s = diff % 60;
+                    if (d > 0) {
+                        el.textContent = d + 'D ' + h + 'H ' + m + 'M';
+                        el.style.color = 'var(--text2)';
+                    } else if (h > 0) {
+                        el.textContent = h + 'H ' + m + 'M ' + s + 'S';
+                        el.style.color = 'var(--gold)';
+                    } else {
+                        el.textContent = m + 'M ' + s + 'S';
+                        el.style.color = 'var(--red)';
+                    }
+                    setTimeout(tick, 1000);
+                }
+                tick();
+            });
+        }
         /* ── Create Campaign ── */
         async function createCampaign() {
             const isReg = await contract.isRegistered(currentUserAddress);
