@@ -3575,8 +3575,26 @@
                 const ctkRaw = await tokenContract.balanceOf(currentUserAddress);
                 const ctkBal = parseFloat(ethers.utils.formatUnits(ctkRaw, 18));
 
-                const html = all.map((c, i) => buildCard(i, c, contribs[i], ctkBal)).join('');
+                // Pair each campaign with its original index before sorting
+                const paired = all.map((c, i) => ({ c, i, contrib: contribs[i] }));
+
+                // Sort: active first, then reached/withdrawn, then ended
+                paired.sort((a, b) => {
+                    const now = Math.floor(Date.now() / 1000);
+                    const statusScore = (item) => {
+                        const isActive = now < item.c.deadline.toNumber() && !item.c.withdrawn;
+                        const reached = parseFloat(ethers.utils.formatEther(item.c.amountRaised)) >= parseFloat(ethers.utils.formatEther(item.c.goal));
+                        if (isActive && !reached) return 0;   // active & not yet reached — top
+                        if (isActive && reached) return 1;   // active & goal reached
+                        if (!isActive && reached) return 2;   // ended successfully
+                        return 3;                             // ended & failed
+                    };
+                    return statusScore(a) - statusScore(b);
+                });
+
+                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal)).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
+                startCountdowns();
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
             } finally {
@@ -3658,7 +3676,7 @@
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}" data-status="${statusTag}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -3674,9 +3692,9 @@
     </div>
     <div class="cmp-track"><div class="${fillClass}" style="width:${pct}%"></div></div>
     <div class="cmp-meta">
-      <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
-      <span>Deadline: <b>${deadline}</b></span>
-      <span>Backers: <b>—</b></span>
+    <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
+    <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>
+    <span>Backers: <b>—</b></span>
     </div>
   </div>
   <div class="cmp-contribute-panel" id="panel-${id}">
@@ -3881,6 +3899,43 @@
                 btn.disabled = false;
                 btn.textContent = "Register";
             }
+        }
+
+        function startCountdowns() {
+            document.querySelectorAll('.cmp-card').forEach(card => {
+                const id = card.id.replace('card-', '');
+                const el = document.getElementById('deadline-' + id);
+                if (!el) return;
+
+                const end = parseInt(card.dataset.deadline);
+                if (!end) return;
+
+                function tick() {
+                    const now = Math.floor(Date.now() / 1000);
+                    const diff = end - now;
+                    if (diff <= 0) {
+                        el.textContent = 'Expired';
+                        el.style.color = 'var(--text3)';
+                        return;
+                    }
+                    const d = Math.floor(diff / 86400);
+                    const h = Math.floor((diff % 86400) / 3600);
+                    const m = Math.floor((diff % 3600) / 60);
+                    const s = diff % 60;
+                    if (d > 0) {
+                        el.textContent = d + 'D ' + h + 'H ' + m + 'M';
+                        el.style.color = 'var(--text2)';
+                    } else if (h > 0) {
+                        el.textContent = h + 'H ' + m + 'M ' + s + 'S';
+                        el.style.color = 'var(--gold)';
+                    } else {
+                        el.textContent = m + 'M ' + s + 'S';
+                        el.style.color = 'var(--red)';
+                    }
+                    setTimeout(tick, 1000);
+                }
+                tick();
+            });
         }
 
         /* ── Create Campaign ── */
