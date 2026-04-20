@@ -3575,25 +3575,24 @@
                 const ctkRaw = await tokenContract.balanceOf(currentUserAddress);
                 const ctkBal = parseFloat(ethers.utils.formatUnits(ctkRaw, 18));
 
-                // ✅ Get on-chain timestamp — matches what the contract sees
-                const latestBlock = await provider.getBlock('latest');
-                const onchainNow = latestBlock.timestamp;
-
-                // ── Sort campaigns ──
+                // Pair each campaign with its original index before sorting
                 const paired = all.map((c, i) => ({ c, i, contrib: contribs[i] }));
+
+                // Sort: active first, then reached/withdrawn, then ended
                 paired.sort((a, b) => {
+                    const now = Math.floor(Date.now() / 1000);
                     const statusScore = (item) => {
-                        const isActive = onchainNow < item.c.deadline.toNumber();
+                        const isActive = now < item.c.deadline.toNumber() && !item.c.withdrawn;
                         const reached = parseFloat(ethers.utils.formatEther(item.c.amountRaised)) >= parseFloat(ethers.utils.formatEther(item.c.goal));
-                        if (isActive && !reached) return 0;
-                        if (isActive && reached)  return 1;
-                        if (!isActive && reached) return 2;
-                        return 3;
+                        if (isActive && !reached) return 0;   // active & not yet reached — top
+                        if (isActive && reached) return 1;   // active & goal reached
+                        if (!isActive && reached) return 2;   // ended successfully
+                        return 3;                             // ended & failed
                     };
                     return statusScore(a) - statusScore(b);
                 });
 
-                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal, onchainNow)).join('');
+                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal)).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
                 startCountdowns();
             } catch (err) {
@@ -3717,6 +3716,9 @@
     </div>
     <div class="cmp-track"><div class="${fillClass}" style="width:${pct}%"></div></div>
     <div class="cmp-meta">
+    <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
+    <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>
+    <span>Backers: <b>—</b></span>
       <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
         <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>      
         <span>Backers: <b>—</b></span>
@@ -3933,21 +3935,12 @@
                 const end = parseInt(card.dataset.deadline);
                 if (!end) return;
 
-                let expired = false;  // ✅ guard against repeat triggers
-
                 function tick() {
                     const now = Math.floor(Date.now() / 1000);
                     const diff = end - now;
                     if (diff <= 0) {
-                        if (expired) return;  // ✅ only fire once
-                        expired = true;
                         el.textContent = 'Expired';
                         el.style.color = 'var(--text3)';
-                        provider.send("evm_mine", []).then(() => {
-                            loadAllCampaigns();
-                        }).catch(() => {
-                            loadAllCampaigns();
-                        });
                         return;
                     }
                     const d = Math.floor(diff / 86400);
@@ -3969,6 +3962,7 @@
                 tick();
             });
         }
+
         /* ── Create Campaign ── */
         async function createCampaign() {
             const isReg = await contract.isRegistered(currentUserAddress);
