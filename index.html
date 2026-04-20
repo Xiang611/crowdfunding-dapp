@@ -766,20 +766,17 @@
         }
 
         .input-wrap input {
-            width: 100%;
-            background: var(--bg2);
-            border: 1px solid var(--border2);
-            border-radius: var(--radius-sm);
-            padding: 9px 38px 9px 12px;
-            font-size: 13px;
-            color: var(--text);
-            font-family: var(--ff-body);
-            outline: none;
-            transition: border-color var(--transition);
+            background: #0f0f0f;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text1);
+            transition: all 0.2s ease;
         }
 
         .input-wrap input:focus {
-            border-color: var(--teal);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 2px rgba(255, 170, 0, 0.2);
         }
 
         .input-wrap input::placeholder {
@@ -955,27 +952,29 @@
 
         /* ── CREATE ──────────────────────────────────────────────── */
         .create-page {
-            max-width: 600px;
+            max-width: 1000px;
             margin: 0 auto;
             padding: 2.5rem 2rem 4rem;
         }
 
         .form-card {
-            background: var(--bg2);
+            background: linear-gradient(145deg, #1a1a1a, #121212);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 2rem;
+            padding: 28px;
+            box-shadow:
+                0 10px 30px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.05);
         }
 
         .form-section-title {
-            font-family: var(--ff-head);
             font-size: 13px;
-            font-weight: 600;
-            color: var(--text3);
+            letter-spacing: 1.2px;
             text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin-bottom: 1rem;
-            margin-top: 1.5rem;
+            color: var(--text3);
+            margin: 20px 0 10px;
+            border-left: 3px solid var(--gold);
+            padding-left: 10px;
         }
 
         .form-section-title:first-of-type {
@@ -993,7 +992,7 @@
         }
 
         .form-field {
-            margin-bottom: 14px;
+            margin-bottom: 18px;
         }
 
         .form-field label {
@@ -1040,28 +1039,25 @@
 
         .unit-toggle {
             display: flex;
-            border: 1px solid var(--border2);
-            border-radius: var(--radius-sm);
+            background: #0f0f0f;
+            border-radius: 10px;
             overflow: hidden;
-            background: var(--bg3);
-            flex-shrink: 0;
+            border: 1px solid var(--border);
         }
 
         .unit-btn {
-            padding: 0 12px;
-            font-size: 12px;
-            font-weight: 500;
-            font-family: var(--ff-body);
-            color: var(--text3);
+            flex: 1;
+            padding: 8px 10px;
             background: transparent;
-            border: none;
+            color: var(--text2);
             cursor: pointer;
-            transition: var(--transition);
-            white-space: nowrap;
-            border-right: 1px solid var(--border2);
-            height: 100%;
-            display: flex;
-            align-items: center;
+            transition: all 0.2s;
+        }
+
+        .unit-btn.active {
+            background: var(--gold);
+            color: black;
+            font-weight: 600;
         }
 
         .unit-btn:last-child {
@@ -1071,12 +1067,6 @@
         .unit-btn:hover {
             color: var(--text);
             background: var(--bg2);
-        }
-
-        .unit-btn.active {
-            background: var(--gold);
-            color: #fff;
-            font-weight: 600;
         }
 
         /* Duration preview hint */
@@ -1094,24 +1084,22 @@
 
         .btn-create {
             width: 100%;
-            padding: 13px;
-            background: var(--gold);
-            color: #fff;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 14px;
-            font-weight: 700;
-            font-family: var(--ff-head);
-            cursor: pointer;
-            transition: var(--transition);
-            margin-top: 1.5rem;
-            letter-spacing: 0.01em;
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 15px;
+
+            background: linear-gradient(135deg, #ffb300, #ff8800);
+            color: black;
+
+            box-shadow: 0 6px 20px rgba(255,140,0,0.3);
+            transition: all 0.2s ease;
         }
 
         .btn-create:hover {
-            background: #b8760a;
-            box-shadow: 0 6px 20px var(--gold-glow);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(255,140,0,0.4);
         }
 
         .btn-create:disabled {
@@ -1128,6 +1116,16 @@
             margin-top: 14px;
             display: none;
             line-height: 1.5;
+        }
+
+        .status-msg.success {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(0,255,150,0.08);
+            border: 1px solid rgba(0,255,150,0.2);
+            color: #00ffa6;
+            font-size: 13px;
         }
 
         /* ── ABOUT ───────────────────────────────────────────────── */
@@ -1491,11 +1489,243 @@
             border-radius: 8px;
             cursor: pointer;
         }
+
+        .create-hero {
+            text-align: center;
+            padding: 60px 20px 30px;
+        }
+
+        .create-hero h1 {
+            font-size: 64px;
+            font-weight: 800;
+            line-height: 1.1;
+            color: #111;
+        }
+
+        .create-hero h1 span {
+            color: var(--gold);
+        }
+
+        .create-hero p {
+            margin-top: 16px;
+            font-size: 16px;
+            color: var(--text2);
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .hero-title {
+            font-family: var(--ff-head);
+            font-size: clamp(2.8rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.02;
+            letter-spacing: -0.03em;
+            color: var(--text);
+            position: relative;
+            z-index: 2;
+            margin-bottom: 1.25rem;
+        }
+
+        /* 🔥 Gradient highlight text (gold effect) */
+        .hero-highlight {
+            background: linear-gradient(
+                135deg,
+                #b8760a 0%,
+                var(--gold) 40%,
+                #f0a820 65%,
+                var(--gold) 100%
+            );
+            background-size: 200% auto;
+
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+
+            animation: goldFlow 4s linear infinite;
+        }
+
+        .create-hero {
+            max-width: 1500px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            word-break: keep-all;
+            line-height: 1.1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+
+            background: var(--bg2);
+            border: 1px solid var(--border2);
+            border-radius: 100px;
+
+            padding: 5px 18px 5px 6px;
+
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text2);
+
+            margin-bottom: 2.25rem;
+
+            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            position: relative;
+            z-index: 2;
+        }
+
+        /* 🔥 highlighted part (left side pill) */
+        .hero-badge-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+
+            background: linear-gradient(135deg, var(--gold), #f0a820);
+            color: #fff;
+
+            border-radius: 100px;
+            padding: 3px 10px;
+
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        /* 🔥 animated dot */
+        .hero-badge-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #fff;
+            display: inline-block;
+
+            animation: pulse-dot 1.8s ease-in-out infinite;
+        }
+
+        /* ✨ animation */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.4); }
+        }
+
+        .profile-container {
+                max-width: 900px;
+                margin: 0 auto;
+                padding: 3rem 2rem;
+            }
+
+            .profile-header {
+                margin-bottom: 2rem;
+            }
+
+            .profile-title {
+                font-family: var(--ff-head);
+                font-size: 1.8rem;
+                font-weight: 700;
+                color: var(--text);
+            }
+
+            .profile-sub {
+                color: var(--text2);
+                font-size: 14px;
+                margin-top: 5px;
+            }
+
+            /* 🔥 main card */
+            .profile-card {
+                background: linear-gradient(145deg, #ffffff, #f7f8fc);
+                border: 1px solid var(--border);
+                border-radius: 16px;
+                padding: 2rem;
+                box-shadow:
+                    0 10px 30px rgba(0,0,0,0.06),
+                    inset 0 1px 0 rgba(255,255,255,0.6);
+            }
+
+            /* grid layout like your campaign cards */
+            .profile-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 18px;
+            }
+
+            .profile-item {
+                background: var(--bg3);
+                border: 1px solid var(--border);
+                border-radius: 12px;
+                padding: 14px;
+            }
+
+            .profile-label {
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: var(--text3);
+                margin-bottom: 4px;
+            }
+
+            .profile-value {
+                font-size: 14px;
+                font-weight: 500;
+                color: var(--text);
+                word-break: break-word;
+            }
+
+            /* full width for description */
+            .profile-item.full {
+                grid-column: 1 / -1;
+            }
+
+            /* badge style for user type */
+            .profile-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 4px 10px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 500;
+            }
+
+            .badge-individual {
+                background: var(--teal-dim);
+                color: var(--teal);
+                border: 1px solid rgba(0,201,167,0.2);
+            }
+
+            .badge-org {
+                background: var(--gold-dim);
+                color: var(--gold);
+                border: 1px solid var(--gold-glow);
+            }
     </style>
 </head>
 
 <body>
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <h2>Complete Your Profile</h2>
+            <p>Please register before using ChainFund</p>
 
+            <input id="regName" placeholder="Your Name">
+            <input id="regEmail" placeholder="Your Email">
+
+            <select id="regType" style="width:100%;margin:8px 0;padding:10px;border-radius:8px;">
+                <option value="">Select User Type</option>
+                <option value="individual">Individual</option>
+                <option value="organization">Organization</option>
+            </select>
+
+            <textarea id="regDesc"
+                placeholder="Description (optional)"
+                style="width:100%;margin:8px 0;padding:10px;border-radius:8px;">
+            </textarea>
+
+            <button onclick="registerUser()">Register</button>
+        </div>
+    </div>
     <!-- NAV -->
     <nav>
         <a class="nav-brand" href="#" onclick="showTab('home'); return false;">
@@ -1509,6 +1739,7 @@
             <button class="nav-tab" onclick="showTab('about')">About Us</button>
             <button class="nav-tab" onclick="showTab('history')">History</button>
             <button class="nav-tab" onclick="showTab('staking')">Staking</button>
+            <button class="nav-tab" onclick="showTab('profile')">Profile</button>
         </div>
         <div class="nav-right">
             <span class="wallet-pill" id="walletPill">
@@ -1539,21 +1770,12 @@
         <button class="mobile-tab" onclick="showTab('about')">About Us</button>
         <button class="mobile-tab" onclick="showTab('about')">History</button>
         <button class="mobile-tab" onclick="showTab('staking')">Staking</button>
+        <button class="mobile-tab" onclick="showTab('profile')">Profile</button>
     </div>
 
     <!-- ═══ HOME PAGE ═══════════════════════════════════════════ -->
     <div class="page active" id="page-home">
-        <div id="registerModal" class="modal">
-            <div class="modal-content">
-                <h2>Complete Your Profile</h2>
-                <p>Please register before using ChainFund</p>
-
-                <input id="regName" placeholder="Your Name">
-                <input id="regEmail" placeholder="Your Email">
-
-                <button onclick="registerUser()">Register</button>
-            </div>
-        </div>
+        
 
 
         <!-- ── HERO ── -->
@@ -2153,6 +2375,54 @@
 
     </div>
 
+    <!-- ═══ PROFILE PAGE ══════════════════════════════════════ -->
+    <div class="page" id="page-profile">
+
+        <div class="profile-container">
+
+            <div class="profile-header">
+                <div class="profile-title">Your Profile</div>
+                <div class="profile-sub">View your registered details</div>
+            </div>
+
+            <div class="profile-card">
+
+                <div class="profile-grid">
+
+                    <div class="profile-item">
+                        <div class="profile-label">Name</div>
+                        <div class="profile-value" id="profileName">-</div>
+                    </div>
+
+                    <div class="profile-item">
+                        <div class="profile-label">Email</div>
+                        <div class="profile-value" id="profileEmail">-</div>
+                    </div>
+
+                    <div class="profile-item">
+                        <div class="profile-label">Wallet Address</div>
+                        <div class="profile-value" id="profileAddress">-</div>
+                    </div>
+
+                    <div class="profile-item">
+                        <div class="profile-label">User Type</div>
+                        <div class="profile-value">
+                            <span id="profileType" class="profile-badge">-</span>
+                        </div>
+                    </div>
+
+                    <div class="profile-item full">
+                        <div class="profile-label">Description</div>
+                        <div class="profile-value" id="profileDesc">-</div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
     <!-- ═══ CAMPAIGNS PAGE ══════════════════════════════════════ -->
     <div class="page" id="page-campaigns">
 
@@ -2281,11 +2551,16 @@
     <!-- ═══ CREATE PAGE ═════════════════════════════════════════ -->
     <div class="page" id="page-create">
         <div class="create-page">
-            <div class="page-header">
-                <div>
-                    <h2>Create a Campaign</h2>
-                    <p>Fill in the details below to deploy your campaign on-chain</p>
-                </div>
+            <div class="create-hero">
+                <h1 class="hero-title">
+                    Launch Your Campaign.<br>
+                    <span class="hero-highlight">Start funding today.</span>
+                </h1>
+
+                <p>
+                    Create your campaign, set your goal, and bring your idea to life.
+                </p>
+
             </div>
 
             <div class="form-card">
@@ -3440,8 +3715,8 @@
             return deadlineTimestamp;
         }
 
-        const contractAddress = "0x3b777CCBB4e04f84bD7AEB02a28568e4d0B92539";
-        const tokenAddress = "0x04Ef050d0422E49dde8A004D4CE7eF6789272363"; // ← paste Token.sol address
+        const contractAddress = "0xAA92Eb0A54743efDcA2159C87D7bA0eA8724F85d";
+        const tokenAddress = "0xBC7006C158BF97ffEC408EC73DdFbe7d46c368FC"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3461,7 +3736,7 @@
             "function users(address) view returns (string name, string email, bool registered)"
         ];
 
-        const stakingAddress = "0x3BB9778193dB021C43B8FFcc88ae9f5730a93edf"; // ← paste here
+        const stakingAddress = "0x28CDa7B9792e2710AFcc893CAD4e1eD7c6f5F03F"; // ← paste here
         const stakingAbi = [
             "function stake(uint amount)",
             "function unstake()",
@@ -3474,9 +3749,14 @@
 
         /* ── Tab navigation ── */
         function showTab(name) {
+            console.log("TAB:", name);
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab, .mobile-tab').forEach(t => t.classList.remove('active'));
             document.getElementById('page-' + name).classList.add('active');
+
+            if (name === "profile") {
+                loadProfile();
+            }
 
             const prefixMap = {
                 home: 'home',
@@ -3492,6 +3772,8 @@
                     t.classList.add('active');
                 }
             });
+
+            
 
             window.scrollTo(0, 0);
         }
@@ -3512,25 +3794,22 @@
                 tokenContract = new ethers.Contract(tokenAddress, tokenAbi, signer);
                 stakingContract = new ethers.Contract(stakingAddress, stakingAbi, signer);
 
-                // ✅ then load data
-                loadCTKBalance();
-                loadStakingInfo();
-
                 setWalletUI(address);
 
-                let isReg = false;
-                try {
-                    isReg = await contract.isRegistered(address);
-                } catch (e) {
-                    console.error("Registration check failed:", e);
+                const user = localStorage.getItem(`user_${address}`);
+
+                if (!user) {
+                    document.getElementById("registerModal").style.display = "flex";
+                } else {
+                    // optional: show name instead of wallet
+                    const parsed = JSON.parse(user);
+                    setWalletUI(address);
                 }
 
-                if (!isReg) {
-                    showRegistrationForm();
-                } else {
-                    hideRegistrationForm();
-                    loadCampaignCount();
-                }
+                // Load blockchain data
+                loadCTKBalance();
+                loadStakingInfo();
+                loadCampaignCount();
 
             } catch (err) {
                 showStatusMsg('loadStatus', 'error', 'Connection failed: ' + err.message);
@@ -3928,12 +4207,20 @@
             const name = document.getElementById("regName").value.trim();
             const email = document.getElementById("regEmail").value.trim();
 
-            if (!name || !email) {
-                alert("Please fill in all fields.");
+            const type = document.getElementById("regType").value;
+            const description = document.getElementById("regDesc").value.trim();
+
+            if (!name || !email || !type) {
+                alert("Please fill in all required fields.");
                 return;
             }
 
-            // ✅ Check contract exists
+            if (type === "organization" && !description) {
+                alert("Organization must include description.");
+                return;
+            }
+
+            // Check contract exists
             if (!contract) {
                 alert("Wallet not connected.");
                 return;
@@ -3944,19 +4231,26 @@
             btn.textContent = "Registering...";
 
             try {
-                const tx = await contract.registerUser(name, email);
-                await tx.wait();
+                localStorage.setItem(`user_${currentUserAddress}`, JSON.stringify({
+                    name,
+                    email,
+                    type,          
+                    description    
+                }));
+
                 alert("Registered successfully!");
                 hideRegistrationForm();
                 loadCampaignCount();
+
             } catch (err) {
-                // ✅ Show error instead of silent crash
                 alert("Registration failed: " + (err.reason || err.message));
             } finally {
                 btn.disabled = false;
                 btn.textContent = "Register";
             }
         }
+
+
 
         function startCountdowns() {
             document.querySelectorAll('.cmp-card').forEach(card => {
@@ -4015,14 +4309,12 @@
 
         /* ── Create Campaign ── */
         async function createCampaign() {
-            const isReg = await contract.isRegistered(currentUserAddress);
-
-            if (isReg) {
-                hideRegistrationForm();
-                loadCampaignCount();
-            } else {
-                showRegistrationForm();
+            const user = localStorage.getItem(`user_${currentUserAddress}`);
+            if (!user) {
+                document.getElementById("registerModal").style.display = "flex";
+                return;
             }
+            loadCampaignCount();
 
             if (!contract) { showStatusMsg('createStatus', 'error', 'Connect your wallet first.'); return; }
             const title = document.getElementById('title').value.trim();
@@ -4252,6 +4544,28 @@
 
         // Initialise hint with default
         updateDurationHint();
+
+        function loadProfile() {
+            if (!currentUserAddress) return;
+            console.log("PROFILE LOADED");
+            const user = JSON.parse(localStorage.getItem(`user_${currentUserAddress}`));
+
+            // wallet address always available
+            document.getElementById("profileAddress").textContent = currentUserAddress;
+
+            if (!user) {
+                document.getElementById("profileName").textContent = "Not registered";
+                document.getElementById("profileEmail").textContent = "-";
+                document.getElementById("profileType").textContent = "-";
+                document.getElementById("profileDesc").textContent = "-";
+                return;
+            }
+
+            document.getElementById("profileName").textContent = user.name;
+            document.getElementById("profileEmail").textContent = user.email;
+            document.getElementById("profileType").textContent = user.type || "-";
+            document.getElementById("profileDesc").textContent = user.description || "-";
+        }
     </script>
 </body>
 
