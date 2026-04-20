@@ -3431,8 +3431,8 @@
             return Math.max(60, Math.floor(seconds));
         }
 
-        const contractAddress = "0x4C1E99ba7D0AF6A444e52FfB15Fc921116a9D45f";
-        const tokenAddress = "0x1f5D0953803921f032908E5eEe204A352CFf5bc6"; // ← paste Token.sol address
+        const contractAddress = "0x8697DF8032a0Abc8E48aD496EB7D20054726BC44";
+        const tokenAddress = "0x45bC4D779357F1cbdb1852e1FD4CdAc2aeCF848c"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3578,21 +3578,25 @@
                 // Pair each campaign with its original index before sorting
                 const paired = all.map((c, i) => ({ c, i, contrib: contribs[i] }));
 
-                // Sort: active first, then reached/withdrawn, then ended
+                // ✅ Get on-chain timestamp
+                const latestBlock = await provider.getBlock('latest');
+                const onchainNow = latestBlock.timestamp;
+                const browserNow = Math.floor(Date.now() / 1000);
+                const effectiveNow = Math.max(onchainNow, browserNow); // ✅ add this
+
                 paired.sort((a, b) => {
-                    const now = Math.floor(Date.now() / 1000);
                     const statusScore = (item) => {
-                        const isActive = now < item.c.deadline.toNumber() && !item.c.withdrawn;
+                        const isActive = effectiveNow < item.c.deadline.toNumber(); // ✅ effectiveNow
                         const reached = parseFloat(ethers.utils.formatEther(item.c.amountRaised)) >= parseFloat(ethers.utils.formatEther(item.c.goal));
-                        if (isActive && !reached) return 0;   // active & not yet reached — top
-                        if (isActive && reached) return 1;   // active & goal reached
-                        if (!isActive && reached) return 2;   // ended successfully
-                        return 3;                             // ended & failed
+                        if (isActive && !reached) return 0;
+                        if (isActive && reached) return 1;
+                        if (!isActive && reached) return 2;
+                        return 3;
                     };
                     return statusScore(a) - statusScore(b);
                 });
 
-                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal)).join('');
+                const html = paired.map(({ c, i, contrib }) => buildCard(i, c, contrib, ctkBal, effectiveNow)).join('');
                 document.getElementById('campaignsArea').innerHTML = '<div class="campaigns-list">' + html + '</div>';
                 startCountdowns();
             } catch (err) {
@@ -3617,7 +3621,10 @@
             const goal = parseFloat(ethers.utils.formatEther(c.goal));
             const myEth = parseFloat(ethers.utils.formatEther(myContrib || 0));
             const pct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
-            const isActive = onchainNow < c.deadline.toNumber();
+            // ✅ Use the later of onchainNow and browser time
+            const browserNow = Math.floor(Date.now() / 1000);
+            const effectiveNow = Math.max(onchainNow, browserNow);
+            const isActive = effectiveNow < c.deadline.toNumber(); // ← use effectiveNow
             const reached = raised >= goal;
             const statusTag = c.withdrawn ? 'reached' : reached ? 'reached' : isActive ? 'active' : 'ended';
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -3634,7 +3641,7 @@
             const isCreator = currentUserAddress && c.creator.toLowerCase() === currentUserAddress.toLowerCase();
             const canWithdraw = isCreator && reached && !c.withdrawn;
             const canRefund = myEth > 0 && !isActive && !reached;
-            const creatorMustRefund = isCreator && !isActive && !reached && 
+            const creatorMustRefund = isCreator && !isActive && !reached &&
                 parseFloat(ethers.utils.formatEther(c.amountRaised)) > 0 &&
                 !c.refunded;  // hide button if already refunded
 
@@ -3681,7 +3688,7 @@
                 </button>
                 <div class="inline-status" id="rstatus-${id}"></div>
             </div>`
-            : canRefund ? `
+                : canRefund ? `
             <div class="cmp-refund-panel" id="rpanel-${id}" style="display:block;">
                 ${c.refunded ? `
                     <div class="panel-label" style="color:var(--teal);">Refund Processed</div>
@@ -3719,9 +3726,6 @@
     <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
     <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>
     <span>Backers: <b>—</b></span>
-      <span>Goal: <b>${goal.toFixed(4)} ETH</b></span>
-        <span>Ends: <b id="deadline-${id}" style="font-variant-numeric:tabular-nums;">${isActive ? '' : 'Expired'}</b></span>      
-        <span>Backers: <b>—</b></span>
     </div>
   </div>
   <div class="cmp-contribute-panel" id="panel-${id}">
@@ -3935,12 +3939,25 @@
                 const end = parseInt(card.dataset.deadline);
                 if (!end) return;
 
+                // ✅ If already expired at render time, don't start a ticker
+                if (Math.floor(Date.now() / 1000) >= end) {
+                    el.textContent = 'Expired';
+                    el.style.color = 'var(--text3)';
+                    return;
+                }
+
+                let reloaded = false; // ✅ guard flag
+
                 function tick() {
                     const now = Math.floor(Date.now() / 1000);
                     const diff = end - now;
                     if (diff <= 0) {
                         el.textContent = 'Expired';
                         el.style.color = 'var(--text3)';
+                        if (!reloaded) {        // ✅ only reload once per card
+                            reloaded = true;
+                            loadAllCampaigns();
+                        }
                         return;
                     }
                     const d = Math.floor(diff / 86400);
