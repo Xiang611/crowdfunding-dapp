@@ -770,7 +770,7 @@
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 14px;
-            color: var(--text1);
+            color: #ffffff;
             transition: all 0.2s ease;
         }
 
@@ -3943,7 +3943,7 @@
             // ✅ Use the later of onchainNow and browser time
             const browserNow = Math.floor(Date.now() / 1000);
             const effectiveNow = Math.max(onchainNow, browserNow);
-            const isActive = effectiveNow < c.deadline.toNumber(); // ← use effectiveNow
+            const isActive = effectiveNow < c.deadline.toNumber() && !c.withdrawn; // ← use effectiveNow
             const reached = raised >= goal;
             const statusTag = c.withdrawn ? 'reached' : reached ? 'reached' : isActive ? 'active' : 'ended';
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -4028,7 +4028,7 @@
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}" data-creator="${c.creator.toLowerCase()}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}" data-creator="${c.creator.toLowerCase()}" data-withdrawn="${c.withdrawn}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -4283,6 +4283,12 @@
 
                 const end = parseInt(card.dataset.deadline);
                 if (!end) return;
+
+                if (card.dataset.withdrawn === 'true') {
+                    el.textContent = 'Expired';
+                    el.style.color = 'var(--text3)';
+                    return;
+                }
 
                 if (Math.floor(Date.now() / 1000) >= end) {
                     el.textContent = 'Expired';
