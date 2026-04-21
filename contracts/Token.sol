@@ -79,4 +79,10 @@ contract Token {
     ) public view returns (uint) {
         return allowance[tokenOwner][spender];
     }
+
+    function updateCrowdfundingContract(address _addr) public {
+        require(msg.sender == owner, "Not owner");
+        require(_addr != address(0), "Zero address");
+        crowdfundingContract = _addr; // ✅ no "already set" check
+    }
 }

@@ -770,7 +770,7 @@
             border: 1px solid var(--border);
             border-radius: 10px;
             padding: 12px 14px;
-            color: var(--text1);
+            color: #ffffff;
             transition: all 0.2s ease;
         }
 
@@ -3715,8 +3715,8 @@
             return deadlineTimestamp;
         }
 
-        const contractAddress = "0xAA92Eb0A54743efDcA2159C87D7bA0eA8724F85d";
-        const tokenAddress = "0xBC7006C158BF97ffEC408EC73DdFbe7d46c368FC"; // ← paste Token.sol address
+        const contractAddress = "0x2c1f8d107d8f20d1c7636698f49B187ce175D825";
+        const tokenAddress = "0xc3656ed1C87B55Df065c8f7c697d00dE965350F8"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3926,7 +3926,7 @@
             // ✅ Use the later of onchainNow and browser time
             const browserNow = Math.floor(Date.now() / 1000);
             const effectiveNow = Math.max(onchainNow, browserNow);
-            const isActive = effectiveNow < c.deadline.toNumber(); // ← use effectiveNow
+            const isActive = effectiveNow < c.deadline.toNumber() && !c.withdrawn; // ← use effectiveNow
             const reached = raised >= goal;
             const statusTag = c.withdrawn ? 'reached' : reached ? 'reached' : isActive ? 'active' : 'ended';
             const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -4011,7 +4011,7 @@
             </div>` : '';
 
             return `
-<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}" data-creator="${c.creator.toLowerCase()}">
+<div class="cmp-card" id="card-${id}" data-status="${statusTag}" data-deadline="${c.deadline.toNumber()}" data-creator="${c.creator.toLowerCase()}" data-withdrawn="${c.withdrawn}">
   <div class="cmp-body">
     <div class="cmp-top">
       <div>
@@ -4260,6 +4260,12 @@
 
                 const end = parseInt(card.dataset.deadline);
                 if (!end) return;
+
+                if (card.dataset.withdrawn === 'true') {
+                    el.textContent = 'Expired';
+                    el.style.color = 'var(--text3)';
+                    return;
+                }
 
                 if (Math.floor(Date.now() / 1000) >= end) {
                     el.textContent = 'Expired';
