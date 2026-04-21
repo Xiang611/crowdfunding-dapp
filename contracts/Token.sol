@@ -19,7 +19,6 @@ contract Token {
         owner = msg.sender;
     }
 
-    // ── Only owner can set these, one time only
     function setCrowdfundingContract(address _addr) public {
         require(msg.sender == owner, "Not owner");
         require(crowdfundingContract == address(0), "Already set");
@@ -34,7 +33,6 @@ contract Token {
         stakingContract = _addr;
     }
 
-    // ── Both crowdfunding and staking can mint
     function mint(address to, uint amount) public {
         require(
             msg.sender == crowdfundingContract || msg.sender == stakingContract,

@@ -10,7 +10,7 @@ contract Crowdfunding {
 
     constructor(address tokenAddress) {
         token = Token(tokenAddress);
-        owner = msg.sender; // ✅ whoever deploys = platform owner
+        owner = msg.sender; //whoever deploys = platform owner
     }
 
     struct Campaign {
@@ -119,7 +119,7 @@ contract Crowdfunding {
         //Check if creator holds CTK for fee discount
         uint feePercent;
         if (useCTKDiscount && token.balanceOf(msg.sender) >= 10 * 1e18) {
-            feePercent = 1; // ✅ only applies if they chose AND have enough CTK
+            feePercent = 1;
         } else {
             feePercent = 3;
         }

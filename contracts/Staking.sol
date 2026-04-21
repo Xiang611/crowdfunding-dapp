@@ -71,7 +71,6 @@ contract Staking {
         StakeInfo memory s = stakes[msg.sender];
         require(s.amount > 0, "Nothing staked");
 
-        // ✅ Add this lock check
         require(
             block.timestamp >= s.since + 7 days,
             "Tokens locked for 7 days"

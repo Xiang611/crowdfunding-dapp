@@ -963,8 +963,8 @@
             border-radius: var(--radius);
             padding: 28px;
             box-shadow:
-                0 10px 30px rgba(0,0,0,0.4),
-                inset 0 1px 0 rgba(255,255,255,0.05);
+                0 10px 30px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.05);
         }
 
         .form-section-title {
@@ -1093,13 +1093,13 @@
             background: linear-gradient(135deg, #ffb300, #ff8800);
             color: black;
 
-            box-shadow: 0 6px 20px rgba(255,140,0,0.3);
+            box-shadow: 0 6px 20px rgba(255, 140, 0, 0.3);
             transition: all 0.2s ease;
         }
 
         .btn-create:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(255,140,0,0.4);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
         }
 
         .btn-create:disabled {
@@ -1122,8 +1122,8 @@
             margin-top: 12px;
             padding: 12px;
             border-radius: 10px;
-            background: rgba(0,255,150,0.08);
-            border: 1px solid rgba(0,255,150,0.2);
+            background: rgba(0, 255, 150, 0.08);
+            border: 1px solid rgba(0, 255, 150, 0.2);
             color: #00ffa6;
             font-size: 13px;
         }
@@ -1529,13 +1529,11 @@
 
         /* 🔥 Gradient highlight text (gold effect) */
         .hero-highlight {
-            background: linear-gradient(
-                135deg,
-                #b8760a 0%,
-                var(--gold) 40%,
-                #f0a820 65%,
-                var(--gold) 100%
-            );
+            background: linear-gradient(135deg,
+                    #b8760a 0%,
+                    var(--gold) 40%,
+                    #f0a820 65%,
+                    var(--gold) 100%);
             background-size: 200% auto;
 
             -webkit-background-clip: text;
@@ -1572,7 +1570,7 @@
 
             margin-bottom: 2.25rem;
 
-            box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07);
             position: relative;
             z-index: 2;
         }
@@ -1606,100 +1604,109 @@
 
         /* ✨ animation */
         @keyframes pulse-dot {
-            0%, 100% { opacity: 0.3; transform: scale(1); }
-            50% { opacity: 1; transform: scale(1.4); }
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.4);
+            }
         }
 
         .profile-container {
-                max-width: 900px;
-                margin: 0 auto;
-                padding: 3rem 2rem;
-            }
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
 
-            .profile-header {
-                margin-bottom: 2rem;
-            }
+        .profile-header {
+            margin-bottom: 2rem;
+        }
 
-            .profile-title {
-                font-family: var(--ff-head);
-                font-size: 1.8rem;
-                font-weight: 700;
-                color: var(--text);
-            }
+        .profile-title {
+            font-family: var(--ff-head);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
 
-            .profile-sub {
-                color: var(--text2);
-                font-size: 14px;
-                margin-top: 5px;
-            }
+        .profile-sub {
+            color: var(--text2);
+            font-size: 14px;
+            margin-top: 5px;
+        }
 
-            /* 🔥 main card */
-            .profile-card {
-                background: linear-gradient(145deg, #ffffff, #f7f8fc);
-                border: 1px solid var(--border);
-                border-radius: 16px;
-                padding: 2rem;
-                box-shadow:
-                    0 10px 30px rgba(0,0,0,0.06),
-                    inset 0 1px 0 rgba(255,255,255,0.6);
-            }
+        /* 🔥 main card */
+        .profile-card {
+            background: linear-gradient(145deg, #ffffff, #f7f8fc);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow:
+                0 10px 30px rgba(0, 0, 0, 0.06),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
 
-            /* grid layout like your campaign cards */
-            .profile-grid {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 18px;
-            }
+        /* grid layout like your campaign cards */
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
 
-            .profile-item {
-                background: var(--bg3);
-                border: 1px solid var(--border);
-                border-radius: 12px;
-                padding: 14px;
-            }
+        .profile-item {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px;
+        }
 
-            .profile-label {
-                font-size: 11px;
-                text-transform: uppercase;
-                letter-spacing: 0.08em;
-                color: var(--text3);
-                margin-bottom: 4px;
-            }
+        .profile-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text3);
+            margin-bottom: 4px;
+        }
 
-            .profile-value {
-                font-size: 14px;
-                font-weight: 500;
-                color: var(--text);
-                word-break: break-word;
-            }
+        .profile-value {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text);
+            word-break: break-word;
+        }
 
-            /* full width for description */
-            .profile-item.full {
-                grid-column: 1 / -1;
-            }
+        /* full width for description */
+        .profile-item.full {
+            grid-column: 1 / -1;
+        }
 
-            /* badge style for user type */
-            .profile-badge {
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                padding: 4px 10px;
-                border-radius: 20px;
-                font-size: 12px;
-                font-weight: 500;
-            }
+        /* badge style for user type */
+        .profile-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
 
-            .badge-individual {
-                background: var(--teal-dim);
-                color: var(--teal);
-                border: 1px solid rgba(0,201,167,0.2);
-            }
+        .badge-individual {
+            background: var(--teal-dim);
+            color: var(--teal);
+            border: 1px solid rgba(0, 201, 167, 0.2);
+        }
 
-            .badge-org {
-                background: var(--gold-dim);
-                color: var(--gold);
-                border: 1px solid var(--gold-glow);
-            }
+        .badge-org {
+            background: var(--gold-dim);
+            color: var(--gold);
+            border: 1px solid var(--gold-glow);
+        }
     </style>
 </head>
 
@@ -1718,12 +1725,22 @@
                 <option value="organization">Organization</option>
             </select>
 
-            <textarea id="regDesc"
-                placeholder="Description (optional)"
+            <textarea id="regDesc" placeholder="Description (optional)"
                 style="width:100%;margin:8px 0;padding:10px;border-radius:8px;">
             </textarea>
 
             <button onclick="registerUser()">Register</button>
+        </div>
+    </div>
+
+    <div id="creatorModal" class="modal" onclick="if(event.target===this)this.style.display='none'">
+        <div class="modal-content" style="width:380px;text-align:left;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+                <h2 style="font-size:16px;font-weight:700;margin:0;">Creator Profile</h2>
+                <button onclick="document.getElementById('creatorModal').style.display='none'"
+                    style="background:none;border:none;font-size:18px;cursor:pointer;color:#999;padding:0;">✕</button>
+            </div>
+            <div id="creatorModalBody"></div>
         </div>
     </div>
     <!-- NAV -->
@@ -1775,7 +1792,7 @@
 
     <!-- ═══ HOME PAGE ═══════════════════════════════════════════ -->
     <div class="page active" id="page-home">
-        
+
 
 
         <!-- ── HERO ── -->
@@ -3715,8 +3732,8 @@
             return deadlineTimestamp;
         }
 
-        const contractAddress = "0xAA92Eb0A54743efDcA2159C87D7bA0eA8724F85d";
-        const tokenAddress = "0xBC7006C158BF97ffEC408EC73DdFbe7d46c368FC"; // ← paste Token.sol address
+        const contractAddress = "0xb4Fb182d0a5C5011A799E3Aa4393C41f035C9689";
+        const tokenAddress = "0x9EFa48763f98D24F575a13128eDE1112A501c045"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3736,7 +3753,7 @@
             "function users(address) view returns (string name, string email, bool registered)"
         ];
 
-        const stakingAddress = "0x28CDa7B9792e2710AFcc893CAD4e1eD7c6f5F03F"; // ← paste here
+        const stakingAddress = "0x8d9Aa87faf60F9fFED7D6F60d687bF7Cc26BA924"; // ← paste here
         const stakingAbi = [
             "function stake(uint amount)",
             "function unstake()",
@@ -3773,7 +3790,7 @@
                 }
             });
 
-            
+
 
             window.scrollTo(0, 0);
         }
@@ -4052,9 +4069,15 @@
   ${refundPanel}
   <div class="cmp-footer">
     <span class="cmp-creator">
-      Creator: <b style="color:var(--text2);">${creatorInfo && creatorInfo.registered ? escHtml(creatorInfo.name) : ''}</b>
-      <span style="color:var(--text3);font-size:10px;">(${c.creator.slice(0, 6)}...${c.creator.slice(-4)})</span>
-    </span>
+        Creator: 
+        <b style="color:var(--text2);">${creatorInfo && creatorInfo.registered ? escHtml(creatorInfo.name) : ''}</b>
+        <span onclick="viewCreatorProfile('${c.creator}')" 
+            style="color:var(--teal);font-size:10px;font-family:monospace;cursor:pointer;text-decoration:underline;text-decoration-style:dotted;"
+            onmouseover="this.style.color='var(--gold)'" 
+            onmouseout="this.style.color='var(--teal)'">
+            (${c.creator.slice(0, 6)}...${c.creator.slice(-4)}) ↗
+        </span>
+        </span>
     <div style="display:flex;gap:8px;flex-wrap:wrap;">
       <button class="btn-toggle" id="toggle-${id}" onclick="toggleContrib(${id})" ${canContrib ? '' : 'disabled'}>
         ${canContrib ? 'Contribute' : 'Closed'}
@@ -4234,8 +4257,8 @@
                 localStorage.setItem(`user_${currentUserAddress}`, JSON.stringify({
                     name,
                     email,
-                    type,          
-                    description    
+                    type,
+                    description
                 }));
 
                 alert("Registered successfully!");
@@ -4540,6 +4563,42 @@
 
         function escHtml(str) {
             return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
+        function viewCreatorProfile(address) {
+            const user = JSON.parse(localStorage.getItem(`user_${address}`) || 'null');
+            const initials = user?.name ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : address.slice(2, 4).toUpperCase();
+            const typeColor = user?.type === 'organization' ? 'var(--gold)' : 'var(--teal)';
+            const typeBg = user?.type === 'organization' ? 'var(--gold-dim)' : 'var(--teal-dim)';
+            const typeBorder = user?.type === 'organization' ? 'var(--gold-glow)' : 'rgba(0,149,124,0.2)';
+
+            document.getElementById('creatorModalBody').innerHTML = `
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:1.25rem;padding-bottom:1.25rem;border-bottom:1px solid var(--border);">
+                    <div style="width:52px;height:52px;border-radius:50%;background:var(--gold-dim);border:2px solid var(--gold-glow);display:flex;align-items:center;justify-content:center;font-family:var(--ff-head);font-size:16px;font-weight:700;color:var(--gold);flex-shrink:0;">${initials}</div>
+                    <div>
+                        <div style="font-family:var(--ff-head);font-size:15px;font-weight:700;color:var(--text);margin-bottom:3px;">${user?.name || 'Unknown User'}</div>
+                        ${user?.type ? `<span style="font-size:11px;font-weight:500;padding:2px 10px;border-radius:20px;background:${typeBg};color:${typeColor};border:1px solid ${typeBorder};">${user.type}</span>` : ''}
+                    </div>
+                </div>
+                <div style="display:grid;gap:10px;">
+                    <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;">
+                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px;">Wallet Address</div>
+                        <div style="font-size:12px;font-weight:500;color:var(--text);font-family:monospace;word-break:break-all;">${address}</div>
+                    </div>
+                    ${user?.email ? `
+                    <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;">
+                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px;">Email</div>
+                        <div style="font-size:13px;font-weight:500;color:var(--text);">${escHtml(user.email)}</div>
+                    </div>` : ''}
+                    ${user?.description ? `
+                    <div style="background:var(--bg3);border-radius:8px;padding:10px 14px;">
+                        <div style="font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text3);margin-bottom:3px;">About</div>
+                        <div style="font-size:13px;color:var(--text2);line-height:1.6;">${escHtml(user.description)}</div>
+                    </div>` : ''}
+                    ${!user ? `<div style="font-size:13px;color:var(--text3);text-align:center;padding:1rem;">No profile registered on this device.</div>` : ''}
+                </div>
+            `;
+            document.getElementById('creatorModal').style.display = 'flex';
         }
 
         // Initialise hint with default
