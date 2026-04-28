@@ -10,7 +10,7 @@ contract Crowdfunding {
 
     constructor(address tokenAddress) {
         token = Token(tokenAddress);
-        owner = msg.sender;
+        owner = msg.sender; //whoever deploys = platform owner
     }
 
     struct Campaign {
