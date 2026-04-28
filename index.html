@@ -3552,6 +3552,7 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>Loading...';
             document.getElementById('historyStatus').style.display = 'none';
+
             try {
                 const count = (await contract.getCampaignCount()).toNumber();
                 if (count === 0) {
@@ -3560,59 +3561,218 @@
                     return;
                 }
 
-                const promises = [];
-                for (let i = 0; i < count; i++) promises.push(contract.campaigns(i));
-                const all = await Promise.all(promises);
+                // ✅ FIX: Don't use contract.filters for non-indexed events
+                // Instead use topic-based queryFilter with the event signature hash directly
+                const contributedTopic = ethers.utils.id("Contributed(uint256,address,uint256,uint256)");
+                const refundedTopic    = ethers.utils.id("Refunded(uint256,address,uint256)");
+                const withdrawnTopic   = ethers.utils.id("Withdrawn(uint256,address,uint256)");
 
-                const contribPromises = all.map((_, i) => contract.contributions(i, currentUserAddress));
-                const contribs = await Promise.all(contribPromises);
+                const [myContribRaw, allRefundRaw, allWithdrawRaw] = await Promise.all([
+                    provider.getLogs({ fromBlock: 0, toBlock: 'latest', address: contractAddress, topics: [contributedTopic] }),
+                    provider.getLogs({ fromBlock: 0, toBlock: 'latest', address: contractAddress, topics: [refundedTopic] }),
+                    provider.getLogs({ fromBlock: 0, toBlock: 'latest', address: contractAddress, topics: [withdrawnTopic] }),
+                ]);
+
+                const iface = new ethers.utils.Interface(abi);
+
+                const myContribEvents = myContribRaw
+                    .map(log => { try { return { ...iface.parseLog(log), blockNumber: log.blockNumber, transactionHash: log.transactionHash }; } catch(e){ return null; } })
+                    .filter(e => e && e.args.contributor.toLowerCase() === currentUserAddress.toLowerCase());
+
+                const myRefundEvents = allRefundRaw
+                    .map(log => { try { return { ...iface.parseLog(log), blockNumber: log.blockNumber }; } catch(e){ return null; } })
+                    .filter(e => e && e.args.contributor.toLowerCase() === currentUserAddress.toLowerCase());
+
+                const myWithdrawEvents = allWithdrawRaw
+                    .map(log => { try { return { ...iface.parseLog(log), blockNumber: log.blockNumber }; } catch(e){ return null; } })
+                    .filter(e => e && e.args.creator.toLowerCase() === currentUserAddress.toLowerCase());
+
+                // Collect campaign IDs the user is involved in
+                const involvedIds = new Set();
+                myContribEvents.forEach(e => involvedIds.add(e.args.campaignId.toNumber()));
+                myRefundEvents.forEach(e => involvedIds.add(e.args.campaignId.toNumber()));
+
+                // Load all campaigns to check creator
+                const allCampaigns = await Promise.all(
+                    Array.from({ length: count }, (_, i) => contract.campaigns(i))
+                );
+                allCampaigns.forEach((c, i) => {
+                    if (c.creator.toLowerCase() === currentUserAddress.toLowerCase()) involvedIds.add(i);
+                });
+
+                if (involvedIds.size === 0) {
+                    document.getElementById('historyArea').innerHTML = '<div class="empty-state"><div class="empty-icon">◫</div>No activity found for your wallet.</div>';
+                    document.getElementById('historyLabel').textContent = 'No activity found.';
+                    return;
+                }
+
+                const sortedIds = [...involvedIds].sort((a, b) => b - a);
+
+                const allContribByC = await Promise.all(
+                    sortedIds.map(async (campId) => {
+                        try {
+                            // ✅ First try reading Contributed events (works on new contract)
+                            const contributedTopic = ethers.utils.id("Contributed(uint256,address,uint256,uint256)");
+                            const campIdPadded = ethers.utils.hexZeroPad(
+                                ethers.BigNumber.from(campId).toHexString(), 32
+                            );
+                            const evLogs = await provider.getLogs({
+                                fromBlock: 0,
+                                toBlock: 'latest',
+                                address: contractAddress,
+                                topics: [contributedTopic, campIdPadded]
+                            });
+
+                            if (evLogs.length > 0) {
+                                // ✅ New contract — parse events for full timeline with timestamps
+                                const iface = new ethers.utils.Interface([
+                                    "event Contributed(uint256 indexed campaignId, address indexed contributor, uint256 amount, uint256 timestamp)"
+                                ]);
+
+                                const byAddr = {};
+                                for (const log of evLogs) {
+                                    try {
+                                        const parsed = iface.parseLog(log);
+                                        const addr = parsed.args.contributor.toLowerCase();
+                                        if (!byAddr[addr]) {
+                                            byAddr[addr] = {
+                                                addr: parsed.args.contributor,
+                                                txs: [],
+                                                total: ethers.BigNumber.from(0)
+                                            };
+                                        }
+                                        byAddr[addr].txs.push({
+                                            amount: parsed.args.amount,
+                                            ts: parsed.args.timestamp.toNumber(),
+                                            blockNum: log.blockNumber
+                                        });
+                                        byAddr[addr].total = byAddr[addr].total.add(parsed.args.amount);
+                                    } catch(e) { /* skip malformed log */ }
+                                }
+
+                                return Object.values(byAddr).map(({ addr, txs, total }) => ({
+                                    addr,
+                                    totalAmount: total,
+                                    txs
+                                }));
+
+                            } else {
+                                // ✅ Fallback — old contract with no events, scan accounts
+                                const allAccounts = await provider.listAccounts();
+                                const entries = [];
+                                for (const addr of allAccounts) {
+                                    try {
+                                        const amount = await contract.contributions(campId, addr);
+                                        if (amount.gt(0)) {
+                                            entries.push({
+                                                addr,
+                                                totalAmount: amount,
+                                                txs: [{ amount, ts: null, blockNum: null }]
+                                            });
+                                        }
+                                    } catch(e) { /* skip */ }
+                                }
+                                console.log(`Campaign ${campId}: found ${entries.length} contributors (no events)`);
+                                return entries;
+                            }
+
+                        } catch(e) {
+                            console.error('Failed campaign', campId, e);
+                            return [];
+                        }
+                    })
+                );
 
                 let rows = '';
-                let found = 0;
 
-                all.forEach((c, i) => {
-                    const myEth = parseFloat(ethers.utils.formatEther(contribs[i] || 0));
-                    const isCreator = c.creator.toLowerCase() === currentUserAddress.toLowerCase();
+                sortedIds.forEach((i, idx) => {
+                    const c = allCampaigns[i];
                     const raised = parseFloat(ethers.utils.formatEther(c.amountRaised));
                     const goal = parseFloat(ethers.utils.formatEther(c.goal));
                     const now = Math.floor(Date.now() / 1000);
                     const isActive = now < c.deadline.toNumber();
-                    const reached = raised >= goal;
+                    const reached = c.amountRaised.gte(c.goal);
+                    const isCreator = c.creator.toLowerCase() === currentUserAddress.toLowerCase();
                     const deadline = new Date(c.deadline.toNumber() * 1000).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-
-                    if (!isCreator && myEth === 0) return;
-                    found++;
-
-                    let role = isCreator ? '<span style="color:var(--gold);font-weight:500;">Creator</span>' : '<span style="color:var(--teal);font-weight:500;">Contributor</span>';
-                    let status = c.withdrawn ? '<span style="color:var(--gold);">Withdrawn</span>'
-                        : reached ? '<span style="color:var(--teal);">Goal Reached</span>'
-                            : isActive ? '<span style="color:#4f9aff;">Active</span>'
-                                : '<span style="color:var(--red);">Ended</span>';
-
                     const fundingPct = goal > 0 ? Math.min(Math.round((raised / goal) * 100), 100) : 0;
-                    const refundable = !isActive && !reached && myEth > 0;
-                    const withdrawable = isCreator && reached && !c.withdrawn;
-                    const campaignResult = reached ? 'Successful' : !isActive ? 'Failed' : 'In Progress';
-                    const campaignResultColor = reached ? 'var(--teal)' : !isActive ? 'var(--red)' : '#4f9aff';
-                    const timeLeft = isActive ? Math.ceil((c.deadline.toNumber() - Math.floor(Date.now() / 1000)) / 60) + ' min left' : 'Expired';
+
+                    const myEntry = allContribByC[idx].find(e => e.addr.toLowerCase() === currentUserAddress.toLowerCase());
+                    const myTotal = myEntry ? parseFloat(ethers.utils.formatEther(myEntry.totalAmount)) : 0;
+                    const wasRefunded = myRefundEvents.some(e => e.args.campaignId.toNumber() === i);
+                    const didWithdraw = myWithdrawEvents.some(e => e.args.campaignId.toNumber() === i);
+
+                    const role = isCreator
+                        ? `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);">👑 Creator${didWithdraw ? ' · Withdrawn' : ''}</span>`
+                        : wasRefunded
+                            ? `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:rgba(220,38,38,0.08);color:var(--red);border:1px solid rgba(220,38,38,0.2);">↩ Refunded</span>`
+                            : `<span style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:var(--teal-dim);color:var(--teal);border:1px solid rgba(0,149,124,0.2);">💚 Contributor</span>`;
+
+                    const resultLabel = reached ? 'Successful' : !isActive ? 'Failed' : 'In Progress';
+                    const resultColor = reached ? 'var(--teal)' : !isActive ? 'var(--red)' : '#4f9aff';
+
+                    const timelineRows = allContribByC[idx].flatMap(({ addr, totalAmount, txs }) => {
+                        const isMe = addr.toLowerCase() === currentUserAddress.toLowerCase();
+                        const totalEth = parseFloat(ethers.utils.formatEther(totalAmount));
+
+                        if (txs.length > 0) {
+                            return txs.map(tx => {
+                                const txAmt = parseFloat(ethers.utils.formatEther(tx.amount));
+                                const ts = tx.ts
+                                    ? new Date(tx.ts * 1000).toLocaleString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                                    : tx.blockNum
+                                        ? 'Block #' + tx.blockNum
+                                        : 'Timestamp unavailable — redeploy fixed contract for full history';
+                                return `
+                                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+                                    <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${isMe ? 'var(--gold)' : 'var(--teal)'};"></div>
+                                    <div style="flex:1;min-width:0;">
+                                        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                                            <span style="font-size:12px;font-family:monospace;color:${isMe ? 'var(--gold)' : 'var(--text2)'};">${addr.slice(0,6)}...${addr.slice(-4)}</span>
+                                            ${isMe ? '<span style="font-size:10px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);padding:1px 7px;border-radius:100px;font-weight:600;">You</span>' : ''}
+                                        </div>
+                                        <div style="font-size:11px;color:var(--text3);margin-top:2px;">🕐 ${ts}</div>
+                                    </div>
+                                    <div style="text-align:right;flex-shrink:0;">
+                                        <div style="font-size:13px;font-weight:600;color:var(--text);">+${txAmt.toFixed(4)} ETH</div>
+                                        ${txs.length > 1 ? `<div style="font-size:10px;color:var(--text3);">Total: ${totalEth.toFixed(4)} ETH</div>` : ''}
+                                    </div>
+                                </div>`;
+                            });
+                        } else {
+                            return [`
+                            <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);">
+                                <div style="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:${isMe ? 'var(--gold)' : 'var(--teal)'};opacity:0.5;"></div>
+                                <div style="flex:1;min-width:0;">
+                                    <div style="display:flex;align-items:center;gap:6px;">
+                                        <span style="font-size:12px;font-family:monospace;color:${isMe ? 'var(--gold)' : 'var(--text2)'};">${addr.slice(0,6)}...${addr.slice(-4)}</span>
+                                        ${isMe ? '<span style="font-size:10px;background:var(--gold-dim);color:var(--gold);border:1px solid var(--gold-glow);padding:1px 7px;border-radius:100px;font-weight:600;">You</span>' : ''}
+                                    </div>
+                                    <div style="font-size:11px;color:var(--text3);margin-top:2px;">⛓ On-chain · no timestamp</div>
+                                </div>
+                                <div style="font-size:13px;font-weight:600;color:var(--text);">+${totalEth.toFixed(4)} ETH</div>
+                            </div>`];
+                        }
+                    });
+
+                    const totalTxCount = allContribByC[idx].reduce((n, e) => n + Math.max(e.txs.length, 1), 0);
+                    const timelineHtml = timelineRows.length === 0
+                        ? '<div style="font-size:12px;color:var(--text3);padding:8px 0;">No contributions recorded.</div>'
+                        : timelineRows.join('');
 
                     rows += `
-                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:10px;">
-
-                        <!-- Header -->
-                        <div style="padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);">
+                    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-bottom:12px;">
+                        <div style="padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;border-bottom:1px solid var(--border);background:${wasRefunded ? 'rgba(220,38,38,0.03)' : reached ? 'rgba(0,149,124,0.03)' : 'var(--bg2)'};">
                             <div>
                                 <div style="font-size:11px;color:var(--text3);font-family:monospace;margin-bottom:3px;">Campaign #${i}</div>
                                 <div style="font-family:var(--ff-head);font-size:15px;font-weight:600;color:var(--text);">${escHtml(c.title)}</div>
-                                <div style="font-size:12px;color:var(--text2);margin-top:3px;">${escHtml(c.description)}</div>
+                                <div style="font-size:12px;color:var(--text2);margin-top:2px;">${escHtml(c.description)}</div>
                             </div>
-                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;">
+                            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
                                 ${role}
-                                <span style="font-size:11px;font-weight:500;color:${campaignResultColor};">${campaignResult}</span>
+                                <span style="font-size:11px;font-weight:500;color:${resultColor};">${wasRefunded ? '✗ Campaign Failed' : reached ? '✓ Goal Reached' : !isActive ? '✗ Failed' : '● Active'}</span>
                             </div>
                         </div>
 
-                        <!-- Progress bar -->
                         <div style="padding:0.75rem 1.5rem;border-bottom:1px solid var(--border);">
                             <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:5px;">
                                 <span>${raised.toFixed(4)} ETH raised</span>
@@ -3623,11 +3783,10 @@
                             </div>
                         </div>
 
-                        <!-- Details grid -->
-                        <div style="padding:0.875rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;border-bottom:1px solid var(--border);">
+                        <div style="padding:0.875rem 1.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;border-bottom:1px solid var(--border);">
                             <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;">
                                 <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">My Contribution</div>
-                                <div style="font-size:13px;font-weight:600;color:var(--text);">${myEth > 0 ? myEth.toFixed(4) + ' ETH' : '—'}</div>
+                                <div style="font-size:13px;font-weight:600;color:var(--text);">${myTotal > 0 ? myTotal.toFixed(4) + ' ETH' : '—'}</div>
                             </div>
                             <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;">
                                 <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Total Raised</div>
@@ -3641,36 +3800,88 @@
                                 <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Deadline</div>
                                 <div style="font-size:13px;font-weight:600;color:var(--text);">${deadline}</div>
                             </div>
-                            <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;">
-                                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Time</div>
-                                <div style="font-size:13px;font-weight:600;color:${isActive ? '#4f9aff' : 'var(--text3)'};">${timeLeft}</div>
-                            </div>
-                            <div style="background:var(--bg3);border-radius:8px;padding:8px 12px;">
-                                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">Creator</div>
-                                <div style="font-size:11px;font-weight:600;color:var(--text);font-family:monospace;">${c.creator.slice(0, 6)}...${c.creator.slice(-4)}</div>
+                            <div style="background:${wasRefunded ? 'rgba(220,38,38,0.08)' : reached ? 'rgba(0,149,124,0.08)' : 'var(--bg3)'};border:1px solid ${wasRefunded ? 'rgba(220,38,38,0.2)' : reached ? 'rgba(0,149,124,0.2)' : 'var(--border)'};border-radius:8px;padding:8px 12px;">
+                                <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:3px;">My Status</div>
+                                <div style="font-size:13px;font-weight:600;color:${wasRefunded ? 'var(--red)' : resultColor};">
+                                    ${wasRefunded ? '↩ Refunded' : reached ? '✓ Successful' : !isActive ? '✗ Failed' : '● Active'}
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Action notice -->
-                        <div style="padding:0.75rem 1.5rem;background:var(--bg3);font-size:12px;color:var(--text2);display:flex;align-items:center;gap:8px;">
-                            ${withdrawable ? `<span style="color:var(--gold);">&#9654; You can withdraw funds from this campaign.</span>` : ''}
-                            ${refundable ? `<span style="color:var(--red);">&#9654; You are eligible for a refund on this campaign.</span>` : ''}
-                            ${reached && myEth > 0 && !isCreator ? `<span style="color:var(--teal);">&#9654; Campaign succeeded — check Campaigns to claim tokens.</span>` : ''}
-                            ${!withdrawable && !refundable && !(reached && myEth > 0 && !isCreator) ? `<span style="color:var(--text3);">No action required.</span>` : ''}
-                        </div>
+                        ${wasRefunded ? `
+                        <div style="margin:0;padding:1rem 1.5rem;background:rgba(220,38,38,0.07);border-top:2px solid rgba(220,38,38,0.25);border-bottom:2px solid rgba(220,38,38,0.25);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">↩</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:3px;">You received a refund</div>
+                                    <div style="font-size:12px;color:var(--text2);">This campaign failed to reach its goal. Your contribution of <strong style="color:var(--red);">${refundedAmount.toFixed(4)} ETH</strong> was automatically returned to your wallet.</div>
+                                </div>
+                                <div style="flex-shrink:0;text-align:right;">
+                                    <div style="font-size:18px;font-weight:800;color:var(--red);">+${refundedAmount.toFixed(4)}</div>
+                                    <div style="font-size:11px;color:var(--text3);">ETH returned</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
 
+                        ${reached && myTotal > 0 && !isCreator ? `
+                        <div style="margin:0;padding:1rem 1.5rem;background:rgba(0,149,124,0.07);border-top:2px solid rgba(0,149,124,0.25);border-bottom:2px solid rgba(0,149,124,0.25);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,149,124,0.12);border:1px solid rgba(0,149,124,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">✓</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;font-weight:700;color:var(--teal);margin-bottom:3px;">Campaign succeeded — thank you!</div>
+                                    <div style="font-size:12px;color:var(--text2);">Your contribution of <strong style="color:var(--teal);">${myTotal.toFixed(4)} ETH</strong> helped this campaign reach its goal. CTK tokens may have been minted to your wallet.</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+
+                        ${isCreator && didWithdraw ? `
+                        <div style="margin:0;padding:1rem 1.5rem;background:var(--gold-dim);border-top:2px solid var(--gold-glow);border-bottom:2px solid var(--gold-glow);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(212,136,10,0.15);border:1px solid rgba(212,136,10,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⬆</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;font-weight:700;color:var(--gold);margin-bottom:3px;">Funds successfully withdrawn</div>
+                                    <div style="font-size:12px;color:var(--text2);">You withdrew the campaign funds to your wallet after reaching the goal.</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+
+                        ${isCreator && !reached && !isActive && !c.refunded ? `
+                        <div style="margin:0;padding:1rem 1.5rem;background:rgba(220,38,38,0.07);border-top:2px solid rgba(220,38,38,0.25);border-bottom:2px solid rgba(220,38,38,0.25);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(220,38,38,0.12);border:1px solid rgba(220,38,38,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">⚠</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:3px;">Action required — refund your contributors</div>
+                                    <div style="font-size:12px;color:var(--text2);">This campaign failed. Go to the Campaigns page to trigger refunds for all contributors.</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+
+                        ${isCreator && c.refunded ? `
+                        <div style="margin:0;padding:1rem 1.5rem;background:rgba(0,149,124,0.07);border-top:2px solid rgba(0,149,124,0.25);border-bottom:2px solid rgba(0,149,124,0.25);">
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <div style="width:40px;height:40px;border-radius:50%;background:rgba(0,149,124,0.12);border:1px solid rgba(0,149,124,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">✓</div>
+                                <div style="flex:1;">
+                                    <div style="font-size:14px;font-weight:700;color:var(--teal);margin-bottom:3px;">All contributors refunded</div>
+                                    <div style="font-size:12px;color:var(--text2);">You triggered the refund and all contributor funds were returned.</div>
+                                </div>
+                            </div>
+                        </div>` : ''}
+                        <div style="padding:1rem 1.5rem;">
+                            <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text3);margin-bottom:10px;">
+                                Contribution Timeline · ${totalTxCount} transaction${totalTxCount !== 1 ? 's' : ''}
+                            </div>
+                            
+                            ${timelineHtml}
+                        </div>
                     </div>`;
                 });
 
-                if (found === 0) {
-                    document.getElementById('historyArea').innerHTML = '<div class="empty-state"><div class="empty-icon">◫</div>No activity found for your wallet.</div>';
-                    document.getElementById('historyLabel').textContent = 'No activity found.';
-                } else {
-                    document.getElementById('historyArea').innerHTML = rows;
-                    document.getElementById('historyLabel').textContent = found + ' record' + (found !== 1 ? 's' : '') + ' found';
-                }
+                document.getElementById('historyArea').innerHTML = rows || '<div class="empty-state"><div class="empty-icon">◫</div>No activity found.</div>';
+                document.getElementById('historyLabel').textContent = involvedIds.size + ' campaign' + (involvedIds.size !== 1 ? 's' : '') + ' found';
+
             } catch (err) {
                 showStatusMsg('historyStatus', 'error', 'Failed to load: ' + (err.reason || err.message));
+                console.error(err);
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = '↻ Refresh';
@@ -3715,8 +3926,8 @@
             return deadlineTimestamp;
         }
 
-        const contractAddress = "0x2c1f8d107d8f20d1c7636698f49B187ce175D825";
-        const tokenAddress = "0xc3656ed1C87B55Df065c8f7c697d00dE965350F8"; // ← paste Token.sol address
+        const contractAddress = "0xD3206e145623DCE53F60aAf448B9B8Cd7C3b8802";
+        const tokenAddress = "0xe9700DAFFD07157569AeaD7F4acF7CAF93fdC57D"; // ← paste Token.sol address
         const tokenAbi = [
             "function balanceOf(address) view returns (uint)",
             "function approve(address spender, uint amount) returns (bool)", // ✅ add this
@@ -3733,10 +3944,15 @@
             "function contributions(uint, address) view returns (uint)",
             "function registerUser(string name, string email)",
             "function isRegistered(address user) view returns (bool)",
-            "function users(address) view returns (string name, string email, bool registered)"
+            "function users(address) view returns (string name, string email, bool registered)",
+            "event Contributed(uint indexed campaignId, address indexed contributor, uint amount, uint timestamp)",
+            "event Refunded(uint indexed campaignId, address indexed contributor, uint amount)",
+            "function getContributorCount(uint id) view returns (uint)",
+            "function getContributor(uint id, uint index) view returns (address)",
+            "function getOriginalContribution(uint id, address contributor) view returns (uint)",
         ];
 
-        const stakingAddress = "0x28CDa7B9792e2710AFcc893CAD4e1eD7c6f5F03F"; // ← paste here
+        const stakingAddress = "0xC389Dd5F658975374B2610FA6377CB065C7182aD"; // ← paste here
         const stakingAbi = [
             "function stake(uint amount)",
             "function unstake()",
@@ -4165,25 +4381,85 @@
         }
 
         async function doAutoRefund(id) {
-            const btn = document.getElementById('rbtn-' + id);
+            const btn    = document.getElementById('rbtn-' + id);
             const statEl = document.getElementById('rstatus-' + id);
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span>Processing refunds...';
             setInlineStatus(statEl, 'loading', 'Waiting for MetaMask…');
             try {
-                const tx = await contract.autoRefundAll(id);
+                const c          = await contract.campaigns(id);
+                const deadline   = c.deadline.toNumber();
+                const browserNow = Math.floor(Date.now() / 1000);
+
+                if (browserNow < deadline) {
+                    const secsLeft = deadline - browserNow;
+                    setInlineStatus(statEl, 'error',
+                        `Campaign ends in ${secsLeft < 60 ? secsLeft + 's' : Math.ceil(secsLeft/60) + ' min'}. Please wait.`);
+                    btn.disabled = false;
+                    btn.innerHTML = 'Refund All Contributors';
+                    return;
+                }
+
+                // ✅ Browser is past deadline — try sending the tx
+                // Ganache advances block.timestamp when a tx is mined
+                // so the first attempt mines a block which may be enough
+                setInlineStatus(statEl, 'loading', 'Sending refund transaction…');
+
+                let tx;
+                let attempts = 0;
+                const maxAttempts = 5;
+
+                while (attempts < maxAttempts) {
+                    try {
+                        tx = await contract.autoRefundAll(id);
+                        break; // success — exit loop
+                    } catch (err) {
+                        const reason = err.reason || err.data?.message || err.error?.message || err.message || '';
+                        const notEndedYet = reason.toLowerCase().includes('not ended')
+                            || reason.toLowerCase().includes('not yet')
+                            || reason.toLowerCase().includes('campaign not');
+
+                        attempts++;
+                        if (notEndedYet && attempts < maxAttempts) {
+                            // ✅ Send a dummy ETH transfer to mine a block
+                            // This advances Ganache's block.timestamp
+                            setInlineStatus(statEl, 'loading',
+                                `Chain not synced (attempt ${attempts}/${maxAttempts}) — mining a block…`);
+                            try {
+                                // Send 0 ETH to self to force a block to be mined
+                                await signer.sendTransaction({
+                                    to: currentUserAddress,
+                                    value: ethers.utils.parseEther('0'),
+                                    gasLimit: 21000
+                                });
+                                // Wait a moment for Ganache to process
+                                await new Promise(r => setTimeout(r, 1500));
+                            } catch(dummyErr) {
+                                console.warn('Dummy tx failed:', dummyErr.message);
+                                await new Promise(r => setTimeout(r, 2000));
+                            }
+                        } else {
+                            throw err; // not a timing error, or max attempts reached
+                        }
+                    }
+                }
+
+                if (!tx) throw new Error('Max retry attempts reached. Try again in a few seconds.');
+
                 setInlineStatus(statEl, 'loading', 'Confirming…');
                 await tx.wait();
                 setInlineStatus(statEl, 'success', '✓ Done! All contributors refunded.');
                 btn.style.display = 'none';
                 await loadAllCampaigns();
+
             } catch (err) {
-                const reason = err.reason || err.data?.message || err.error?.message || err.message;
-                setInlineStatus(statEl, 'error', reason);
+                const reason = err.reason || err.data?.message || err.error?.message || err.message || '';
+                setInlineStatus(statEl, 'error', '✗ ' + reason);
                 btn.disabled = false;
                 btn.innerHTML = 'Refund All Contributors';
             }
         }
+
         function setInlineStatus(el, type, msg) {
             const styles = {
                 success: { bg: 'rgba(0,201,167,0.08)', border: 'rgba(0,201,167,0.2)', color: 'var(--teal)' },

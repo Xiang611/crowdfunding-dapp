@@ -10,7 +10,7 @@ contract Crowdfunding {
 
     constructor(address tokenAddress) {
         token = Token(tokenAddress);
-        owner = msg.sender; // ✅ whoever deploys = platform owner
+        owner = msg.sender;
     }
 
     struct Campaign {
@@ -51,6 +51,8 @@ contract Crowdfunding {
     mapping(uint => mapping(address => uint)) public contributions;
     mapping(uint => address[]) public contributors;
     mapping(uint => mapping(address => bool)) public tokensClaimed;
+    mapping(uint => mapping(address => uint)) public originalContributions;
+    mapping(uint => mapping(address => bool)) public hasContributed;
 
     event CampaignCreated(
         uint campaignId,
@@ -63,19 +65,24 @@ contract Crowdfunding {
 
     event Refunded(uint campaignId, address contributor, uint amount);
 
-    event TokensClaimed(uint campaignId, address contributor, uint amount);
+    event TokensClaimed(uint indexed campaignId, address indexed contributor, uint amount);
 
+    event Contributed(uint indexed campaignId, address indexed contributor, uint amount, uint timestamp);
+    
     function createCampaign(
         string memory _title,
         string memory _description,
         uint _goal,
-        uint _deadlineTimestamp // ← exact Unix timestamp instead of duration
+        uint _deadlineTimestamp
     ) public {
         require(_goal > 0, "Goal must be > 0");
         require(
             _deadlineTimestamp > block.timestamp,
             "Deadline must be in the future"
         );
+        if (bytes(_title).length == 0) revert("Title cannot be empty");
+        if (bytes(_description).length == 0)
+            revert("Description cannot be empty");
 
         campaigns.push(
             Campaign(
@@ -83,7 +90,7 @@ contract Crowdfunding {
                 _title,
                 _description,
                 _goal,
-                _deadlineTimestamp, // ← store directly
+                _deadlineTimestamp,
                 0,
                 false,
                 false
@@ -96,15 +103,21 @@ contract Crowdfunding {
 
     function contribute(uint id) public payable {
         Campaign storage c = campaigns[id];
+        if (msg.value == 0) revert("Contribution must be > 0");
+        if (block.timestamp > c.deadline) revert("Campaign has ended");
 
-        require(block.timestamp <= c.deadline, "Campaign ended");
-
-        if (contributions[id][msg.sender] == 0) {
+        // ✅ push contributor to array only once
+        if (!hasContributed[id][msg.sender]) {
             contributors[id].push(msg.sender);
+            hasContributed[id][msg.sender] = true;
         }
 
         contributions[id][msg.sender] += msg.value;
+        originalContributions[id][msg.sender] += msg.value;
         c.amountRaised += msg.value;
+
+        // ✅ emit event with timestamp for history
+        emit Contributed(id, msg.sender, msg.value, block.timestamp);
     }
 
     function withdraw(uint id, bool useCTKDiscount) public {
@@ -113,19 +126,20 @@ contract Crowdfunding {
         require(msg.sender == c.creator, "Only creator can withdraw");
         require(c.amountRaised >= c.goal, "Funding goal not reached");
         require(!c.withdrawn, "Already withdrawn");
-
         c.withdrawn = true;
+        assert(c.withdrawn == true); //checks the mutation succeeded
 
         //Check if creator holds CTK for fee discount
         uint feePercent;
         if (useCTKDiscount && token.balanceOf(msg.sender) >= 10 * 1e18) {
-            feePercent = 1; // ✅ only applies if they chose AND have enough CTK
+            feePercent = 1;
         } else {
             feePercent = 3;
         }
 
         uint fee = (c.amountRaised * feePercent) / 100;
         uint creatorAmount = c.amountRaised - fee;
+        assert(creatorAmount + fee == c.amountRaised);
         platformFeeBalance += fee;
 
         //Auto-mint CTK to all contributors
@@ -139,9 +153,12 @@ contract Crowdfunding {
                 uint tokensToMint = wholeEth * 1e18;
 
                 if (tokensToMint > 0) {
-                    tokensClaimed[id][contributor] = true;
-                    token.mint(contributor, tokensToMint);
-                    emit TokensClaimed(id, contributor, tokensToMint);
+                    try token.mint(contributor, tokensToMint) {
+                        tokensClaimed[id][contributor] = true;
+                        emit TokensClaimed(id, contributor, tokensToMint);
+                    } catch {
+                        // mint failed silently — user can still call claimTokens() later
+                    }
                 }
             }
         }
@@ -167,6 +184,7 @@ contract Crowdfunding {
             uint amount = contributions[id][contributor];
             if (amount > 0) {
                 contributions[id][contributor] = 0;
+                assert(contributions[id][contributor] == 0);
                 payable(contributor).transfer(amount);
                 emit Refunded(id, contributor, amount);
             }
@@ -178,7 +196,7 @@ contract Crowdfunding {
     }
 
     function claimTokens(uint id) public {
-        require(id < campaigns.length, "Campaign does not exist");
+        if (id >= campaigns.length) revert("Campaign does not exist");
         Campaign storage c = campaigns[id];
         require(c.amountRaised >= c.goal, "Campaign did not succeed");
         require(contributions[id][msg.sender] > 0, "No contribution found");
@@ -187,6 +205,7 @@ contract Crowdfunding {
         uint wholeEth = contributed / 1 ether;
         uint tokensToMint = wholeEth * 1e18;
         require(tokensToMint > 0, "Need at least 1 ETH to earn tokens");
+        assert(tokensToMint >= 1e18);
         tokensClaimed[id][msg.sender] = true;
         token.mint(msg.sender, tokensToMint);
         emit TokensClaimed(id, msg.sender, tokensToMint);
